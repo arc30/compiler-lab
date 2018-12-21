@@ -24,18 +24,18 @@ void freeReg()
 int codeGen(struct tnode* t, FILE* target_file)
 {
 	//if leaf node ie number
-	int reg0, reg1, reg2 ;
+
 	if(!(t->isOperator))
 	{
-		reg0 = getReg();
+		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, %d\n", reg0, t->val);
 		return reg0;
 	}
 	
-	if(t->isOperator == 1)
+	if(t->isOperator)
 	{
-		reg1 = codeGen(t->left, target_file);
-		reg2 = codeGen(t->right, target_file);
+		int reg1 = codeGen(t->left, target_file);
+		int reg2 = codeGen(t->right, target_file);
 		switch(*(t->op))
 		{
 			case '+':	fprintf(target_file, "ADD R%d, R%d\n", reg1, reg2);
@@ -55,10 +55,11 @@ int codeGen(struct tnode* t, FILE* target_file)
 						
 		}
 		freeReg();
+		return reg1;
 	}
 
-	return reg1;
-	//TODO HANDLE -1 CASE
+	return -1;
+	// HANDLE -1 CASE
 	
 }
 		
