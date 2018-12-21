@@ -75,3 +75,6 @@ struct tnode* makeLeafNode(int n)
 		}	
 			
 	}
+	
+	
+

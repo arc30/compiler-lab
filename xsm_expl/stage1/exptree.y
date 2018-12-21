@@ -7,6 +7,8 @@
 	#include "exptree.h"
 	#include "exptree.c"
 	
+	#include "codegen.c"
+	
 	int yylex(void);
 	
 	%}
@@ -28,6 +30,10 @@
 	printf("Postfix form: " );
 	postfixForm($1);
 	printf("\n");
+	
+	printf("Calling CodeGen: \n");
+	FILE* fptr=fopen("target_file.xsm","w");
+	codeGen($1, fptr);
 	
 	exit(1);
 	}
