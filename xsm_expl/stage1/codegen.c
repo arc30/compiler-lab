@@ -36,6 +36,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 		int reg1 = codeGen(t->left, target_file);
 		int reg2 = codeGen(t->right, target_file);
+		
 		switch(*(t->op))
 		{
 			case '+':	fprintf(target_file, "ADD R%d, R%d\n", reg1, reg2);
@@ -50,10 +51,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 			case '/':	fprintf(target_file, "DIV R%d, R%d\n", reg1, reg2);
 			break;
 			
-			default : 	fprintf(target_file, "INVALID INSTRUCTION");
-						exit(1);
-						
+			default : 	printf("INVALID OPERATOR");
+						exit(1);				
 		}
+		
 		freeReg();
 		return reg1;
 	}
