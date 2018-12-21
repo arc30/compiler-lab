@@ -23,9 +23,9 @@ void freeReg()
 
 int codeGen(struct tnode* t, FILE* target_file)
 {
-	//if leaf node
-	int reg0, reg1, reg2;
-	if(t->isOperator == 0)
+	//if leaf node ie number
+	int reg0, reg1, reg2 ;
+	if(!(t->isOperator))
 	{
 		reg0 = getReg();
 		fprintf(target_file, "MOV R%d, %d\n", reg0, t->val);
@@ -49,6 +49,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 			
 			case '/':	fprintf(target_file, "DIV R%d, R%d\n", reg1, reg2);
 			break;
+			
+			default : 	fprintf(target_file, "INVALID INSTRUCTION");
+						exit(1);
 						
 		}
 		freeReg();
