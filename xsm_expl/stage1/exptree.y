@@ -5,10 +5,8 @@
 	#define YYSTYPE tnode *
 	
 	#include "exptree.h"
-	#include "exptree.c"
 	
 	#include "codegen.h"
-	#include "codegen.c"
 	
 	int yylex(void);
 	

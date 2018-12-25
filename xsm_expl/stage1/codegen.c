@@ -1,4 +1,6 @@
+#include "codegen.h"
 
+#include <stdlib.h>
 
 static int freeRegister=0;
 
