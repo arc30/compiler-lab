@@ -1,4 +1,4 @@
-#include "exptree.h"
+//#include "exptree.h"
 
 struct tnode* makeLeafNode(int n)
 {
