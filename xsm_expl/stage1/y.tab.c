@@ -444,7 +444,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    23,    23,    43,    44,    45,    46,    47,    48
+       0,    23,    23,    44,    45,    46,    47,    48,    49
 };
 #endif
 
@@ -1231,53 +1231,54 @@ yyreduce:
 	postfixForm((yyvsp[-1]));
 	printf("\n");
 	
-	printf("Calling CodeGen: \n");
-	FILE* fptr=fopen("target_file.xsm","w");
-	codeGen((yyvsp[-1]), fptr);
+	printf("Calling CodeGenInitialize: \n");
+	FILE* fptr=fopen("target_file1.xsm","w");
+	codeGenInitialize_xsmPrint((yyvsp[-1]), fptr);
+	fclose(fptr);
 	
 	exit(1);
 	}
-#line 1241 "y.tab.c" /* yacc.c:1646  */
+#line 1242 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 43 "exptree.y" /* yacc.c:1646  */
+#line 44 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('+',(yyvsp[-2]),(yyvsp[0]));}
-#line 1247 "y.tab.c" /* yacc.c:1646  */
+#line 1248 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 44 "exptree.y" /* yacc.c:1646  */
+#line 45 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('-',(yyvsp[-2]),(yyvsp[0]));}
-#line 1253 "y.tab.c" /* yacc.c:1646  */
+#line 1254 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 45 "exptree.y" /* yacc.c:1646  */
+#line 46 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('*',(yyvsp[-2]),(yyvsp[0]));}
-#line 1259 "y.tab.c" /* yacc.c:1646  */
+#line 1260 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 46 "exptree.y" /* yacc.c:1646  */
+#line 47 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('/',(yyvsp[-2]),(yyvsp[0]));}
-#line 1265 "y.tab.c" /* yacc.c:1646  */
+#line 1266 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 47 "exptree.y" /* yacc.c:1646  */
+#line 48 "exptree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-1]);}
-#line 1271 "y.tab.c" /* yacc.c:1646  */
+#line 1272 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 48 "exptree.y" /* yacc.c:1646  */
+#line 49 "exptree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1277 "y.tab.c" /* yacc.c:1646  */
+#line 1278 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1281 "y.tab.c" /* yacc.c:1646  */
+#line 1282 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1505,7 +1506,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 51 "exptree.y" /* yacc.c:1906  */
+#line 52 "exptree.y" /* yacc.c:1906  */
 
 	
 	yyerror(char const *s)

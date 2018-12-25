@@ -1,3 +1,5 @@
+#include "exptree.h"
+
 struct tnode* makeLeafNode(int n)
 {
 	struct tnode *temp;

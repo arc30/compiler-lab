@@ -32,9 +32,10 @@
 	postfixForm($1);
 	printf("\n");
 	
-	printf("Calling CodeGen: \n");
-	FILE* fptr=fopen("target_file.xsm","w");
-	codeGen($1, fptr);
+	printf("Calling CodeGenInitialize: \n");
+	FILE* fptr=fopen("target_file1.xsm","w");
+	codeGenInitialize_xsmPrint($1, fptr);
+	fclose(fptr);
 	
 	exit(1);
 	}
