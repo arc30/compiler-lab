@@ -1,3 +1,6 @@
+#ifndef EXPTREE_H
+#define EXPTREE_H
+
 typedef struct tnode
 {
 	int isOperator;
@@ -22,3 +25,5 @@ typedef struct tnode
 	void printValue(struct tnode* t);
 	
 	void postfixForm(struct tnode* t);
+
+#endif
