@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include "exptree.h"
 
-int codeGen(struct tnode* t, FILE* target_file);
+void codeGenXsm(struct tnode* t, FILE* target_file);
 
 #endif

@@ -23,40 +23,6 @@ void freeReg()
 
 }	
 
-void codeGenInitialize_xsmPrint(struct tnode* t, FILE* target_file)
-{
-	fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-
-
-
-	int result = codeGen(t, target_file);
-	
-	fprintf(target_file,
-			"MOV SP, 4096\nMOV [4096], R%d\n",
-			 result);
-
-	
-	fprintf(target_file, "MOV R0, \"Write\"\n");		
-   	fprintf(target_file, "PUSH R0 \n");  	
-   	fprintf(target_file, "MOV R0, -2 \n");
-   	fprintf(target_file, "PUSH R0 \n");
-   	fprintf(target_file, "MOV R0, [4096] \n");
-   	fprintf(target_file, "PUSH R0 \n");
-   	fprintf(target_file, "PUSH R0 \n");
-   	fprintf(target_file, "PUSH R0 \n");
-   	fprintf(target_file, "CALL 0 \n");
-   	fprintf(target_file, "POP R0 \n");
-   	fprintf(target_file, "POP R1 \n");
-   	fprintf(target_file, "POP R1 \n");
-   	fprintf(target_file, "POP R1 \n");
-   	fprintf(target_file, "POP R1 \n");
-   	fprintf(target_file, "MOV R0, \"Exit\" \n");
-   	fprintf(target_file, "PUSH R0 \n");
-   	fprintf(target_file, "CALL 0 \n");
-   	
-   	
-   	
-}
 
 int codeGen(struct tnode* t, FILE* target_file)
 {
@@ -101,4 +67,42 @@ int codeGen(struct tnode* t, FILE* target_file)
 	
 }
 		
+
+
+void codeGenXsm(struct tnode* t, FILE* target_file)
+{
+	fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
+
+
+
+	int result = codeGen(t, target_file);
+	
+	fprintf(target_file,
+			"MOV SP, 4096\nMOV [4096], R%d\n",
+			 result);
+
+	
+	fprintf(target_file, "MOV R0, \"Write\"\n");		
+   	fprintf(target_file, "PUSH R0 \n");  	
+   	fprintf(target_file, "MOV R0, -2 \n");
+   	fprintf(target_file, "PUSH R0 \n");
+   	fprintf(target_file, "MOV R0, [4096] \n");
+   	fprintf(target_file, "PUSH R0 \n");
+   	fprintf(target_file, "PUSH R0 \n");
+   	fprintf(target_file, "PUSH R0 \n");
+   	fprintf(target_file, "CALL 0 \n");
+   	fprintf(target_file, "POP R0 \n");
+   	fprintf(target_file, "POP R1 \n");
+   	fprintf(target_file, "POP R1 \n");
+   	fprintf(target_file, "POP R1 \n");
+   	fprintf(target_file, "POP R1 \n");
+   	fprintf(target_file, "MOV R0, \"Exit\" \n");
+   	fprintf(target_file, "PUSH R0 \n");
+   	fprintf(target_file, "CALL 0 \n");
+   	
+   	
+   	
+}
+
+
 	

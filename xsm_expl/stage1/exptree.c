@@ -80,5 +80,16 @@ struct tnode* makeLeafNode(int n)
 			
 	}
 	
+	void inorderForm(struct tnode* t)
+	{
+		if(t != NULL)
+		{	
+			inorderForm(t->left);
+			printValue(t);	
+			inorderForm(t->right);
+			
+		}	
+			
+	}
 	
 
