@@ -19,7 +19,7 @@
 	%%
 	
 	program : expr END {
-	$$ = $2;
+	//$$ = $2;
 	printf("Answer : %d\n",evaluate($1));
 	
 	printf("Prefix form: " );
