@@ -1,0 +1,3 @@
+MOV R0, 8
+MOV R1, 3
+ADD R0, R1
