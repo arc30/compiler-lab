@@ -1254,7 +1254,7 @@ yyreduce:
 		inorderForm((yyvsp[-1]));
 		printf("Calling codegen \n");
 		FILE *fptr = fopen("targetfile.xsm","w");
-		codeGenXsm((yyvsp[-1]), fptr);
+		evaluateAst((yyvsp[-1]));
 		exit(1);
 	}
 #line 1261 "y.tab.c" /* yacc.c:1646  */

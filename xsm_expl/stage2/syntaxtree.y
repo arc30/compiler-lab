@@ -30,7 +30,7 @@
 		inorderForm($2);
 		printf("Calling codegen \n");
 		FILE *fptr = fopen("targetfile.xsm","w");
-		codeGenXsm($2, fptr);
+		evaluateAst($2);
 		exit(1);
 	}
 	|BEG END {printf("No statements\n"); exit(1); }	

@@ -25,22 +25,25 @@ struct tnode* makeLeafNode(int n)
 	return temp;
 	}
 	
-	int evaluate(struct tnode *t){
-	if(t->op == NULL){
-	return t->val;
-	}
-	else{
-	switch(*(t->op)){
-	case '+' : return evaluate(t->left) + evaluate(t->right);
-	break;
-	case '-' : return evaluate(t->left) - evaluate(t->right);
-	break;
-	case '*' : return evaluate(t->left) * evaluate(t->right);
-	break;
-	case '/' : return evaluate(t->left) / evaluate(t->right);
-	break;
-	}
-	}
+	int evaluate(struct tnode *t)
+	{
+		if(t->op == NULL)
+		{
+			return t->val;
+		}
+		else
+		{
+			switch(*(t->op)){
+			case '+' : return evaluate(t->left) + evaluate(t->right);
+			break;
+			case '-' : return evaluate(t->left) - evaluate(t->right);
+			break;
+			case '*' : return evaluate(t->left) * evaluate(t->right);
+			break;
+			case '/' : return evaluate(t->left) / evaluate(t->right);
+			break;
+		}
+		}
 	}
 	
 	void printValue(struct tnode *t)

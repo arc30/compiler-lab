@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include "syntaxtree.h"
 
-void codeGenXsm(struct tnode* t, FILE* target_file);
+void evaluateAst(struct tnode* t);
 
 #endif
