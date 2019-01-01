@@ -2,7 +2,7 @@
 #define CODEGEN_H
 
 #include <stdio.h>
-#include "exptree.h"
+#include "syntaxtree.h"
 
 void codeGenXsm(struct tnode* t, FILE* target_file);
 

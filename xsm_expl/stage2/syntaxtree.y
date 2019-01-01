@@ -5,7 +5,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 
-	
+	#include "codegen.h"
 
 	#include "syntaxtree.h"
 
@@ -28,6 +28,9 @@
 	{		
 		printf("Generating AST, inorderForm is: \n");
 		inorderForm($2);
+		printf("Calling codegen \n");
+		FILE *fptr = fopen("targetfile.xsm","w");
+		codeGenXsm($2, fptr);
 		exit(1);
 	}
 	|BEG END {printf("No statements\n"); exit(1); }	

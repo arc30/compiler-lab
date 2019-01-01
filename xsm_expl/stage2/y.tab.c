@@ -68,7 +68,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 
-	
+	#include "codegen.h"
 
 	#include "syntaxtree.h"
 
@@ -459,8 +459,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    27,    27,    33,    36,    37,    40,    41,    42,    45,
-      47,    49,    51,    52,    53,    54,    55,    56,    57
+       0,    27,    27,    36,    39,    40,    43,    44,    45,    48,
+      50,    52,    54,    55,    56,    57,    58,    59,    60
 };
 #endif
 
@@ -1252,109 +1252,112 @@ yyreduce:
     {		
 		printf("Generating AST, inorderForm is: \n");
 		inorderForm((yyvsp[-1]));
+		printf("Calling codegen \n");
+		FILE *fptr = fopen("targetfile.xsm","w");
+		codeGenXsm((yyvsp[-1]), fptr);
 		exit(1);
 	}
-#line 1258 "y.tab.c" /* yacc.c:1646  */
+#line 1261 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 33 "syntaxtree.y" /* yacc.c:1646  */
+#line 36 "syntaxtree.y" /* yacc.c:1646  */
     {printf("No statements\n"); exit(1); }
-#line 1264 "y.tab.c" /* yacc.c:1646  */
+#line 1267 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 36 "syntaxtree.y" /* yacc.c:1646  */
+#line 39 "syntaxtree.y" /* yacc.c:1646  */
     { (yyval)=makeConnectorNode(CONNECTOR,(yyvsp[-1]),(yyvsp[0])); }
-#line 1270 "y.tab.c" /* yacc.c:1646  */
+#line 1273 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 37 "syntaxtree.y" /* yacc.c:1646  */
+#line 40 "syntaxtree.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]);	}
-#line 1276 "y.tab.c" /* yacc.c:1646  */
+#line 1279 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 40 "syntaxtree.y" /* yacc.c:1646  */
+#line 43 "syntaxtree.y" /* yacc.c:1646  */
     { (yyval)=(yyvsp[0]);}
-#line 1282 "y.tab.c" /* yacc.c:1646  */
+#line 1285 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 41 "syntaxtree.y" /* yacc.c:1646  */
+#line 44 "syntaxtree.y" /* yacc.c:1646  */
     { (yyval)=(yyvsp[0]); }
-#line 1288 "y.tab.c" /* yacc.c:1646  */
+#line 1291 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 42 "syntaxtree.y" /* yacc.c:1646  */
+#line 45 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval)=(yyvsp[0]);}
-#line 1294 "y.tab.c" /* yacc.c:1646  */
+#line 1297 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 45 "syntaxtree.y" /* yacc.c:1646  */
+#line 48 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeReadNode(READ, (yyvsp[-2]));}
-#line 1300 "y.tab.c" /* yacc.c:1646  */
+#line 1303 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 47 "syntaxtree.y" /* yacc.c:1646  */
+#line 50 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeWriteNode(WRITE, (yyvsp[-2]));}
-#line 1306 "y.tab.c" /* yacc.c:1646  */
+#line 1309 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 49 "syntaxtree.y" /* yacc.c:1646  */
+#line 52 "syntaxtree.y" /* yacc.c:1646  */
     { (yyval) = makeAssignmentNode(ASSGN,'=',(yyvsp[-3]),(yyvsp[-1])); }
-#line 1312 "y.tab.c" /* yacc.c:1646  */
+#line 1315 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 51 "syntaxtree.y" /* yacc.c:1646  */
+#line 54 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode(PLUS,'+',(yyvsp[-2]),(yyvsp[0]));}
-#line 1318 "y.tab.c" /* yacc.c:1646  */
+#line 1321 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 52 "syntaxtree.y" /* yacc.c:1646  */
+#line 55 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode(MINUS, '-',(yyvsp[-2]),(yyvsp[0]));}
-#line 1324 "y.tab.c" /* yacc.c:1646  */
+#line 1327 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 53 "syntaxtree.y" /* yacc.c:1646  */
+#line 56 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode(MUL, '*',(yyvsp[-2]),(yyvsp[0]));}
-#line 1330 "y.tab.c" /* yacc.c:1646  */
+#line 1333 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 54 "syntaxtree.y" /* yacc.c:1646  */
+#line 57 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode(DIV, '/',(yyvsp[-2]),(yyvsp[0]));}
-#line 1336 "y.tab.c" /* yacc.c:1646  */
+#line 1339 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 55 "syntaxtree.y" /* yacc.c:1646  */
+#line 58 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-1]);}
-#line 1342 "y.tab.c" /* yacc.c:1646  */
+#line 1345 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 56 "syntaxtree.y" /* yacc.c:1646  */
+#line 59 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1348 "y.tab.c" /* yacc.c:1646  */
+#line 1351 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 57 "syntaxtree.y" /* yacc.c:1646  */
+#line 60 "syntaxtree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1354 "y.tab.c" /* yacc.c:1646  */
+#line 1357 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1358 "y.tab.c" /* yacc.c:1646  */
+#line 1361 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1582,7 +1585,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 62 "syntaxtree.y" /* yacc.c:1906  */
+#line 65 "syntaxtree.y" /* yacc.c:1906  */
 
 	
 	yyerror(char const *s)

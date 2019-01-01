@@ -1,5 +1,6 @@
 begin
-read (a);
-b=a+2;
-write(b+2);
-end
+ read (a);
+    read (b);
+    d = a + 2 * b;
+    write (a+d);
+end; 
