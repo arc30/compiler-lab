@@ -17,44 +17,44 @@ struct tnode* createTree(int val, int type, char c, int nodetype, struct tnode* 
 	temp->right=r;
 }
 
-struct tnode* makeConnectorNode(int nodeid, struct tnode* l, struct tnode* r)
+struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	return createTree(-1,-1,-1,nodeid,l,r);
+	return createTree(-1,-1,-1,nodetype,l,r);
 }
 
 /*read and write nodes have only one child. 
 Convention is to make LEFT child always null
 */
 
-struct tnode* makeReadNode(int nodeid, struct tnode* lr)
+struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-	return createTree(-1,-1,-1,nodeid,NULL,lr);
+	return createTree(-1,-1,-1,nodetype,NULL,lr);
 }
 
-struct tnode* makeWriteNode(int nodeid, struct tnode* lr)
+struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
-		return createTree(-1,-1,-1,nodeid,NULL,lr);
+		return createTree(-1,-1,-1,nodetype,NULL,lr);
 }
 
-struct tnode* makeLeafNodeVar(int nodeid, char ch)
+struct tnode* makeLeafNodeVar(int nodetype, char ch)
 {
-	return createTree(-1,-1,ch,nodeid,NULL,NULL);
+	return createTree(-1,-1,ch,nodetype,NULL,NULL);
 }
 
 
-struct tnode* makeLeafNodeNum(int nodeid, int n)
+struct tnode* makeLeafNodeNum(int nodetype, int n)
 {
-	return createTree(n,-1,-1,nodeid,NULL,NULL);
+	return createTree(n,-1,-1,nodetype,NULL,NULL);
 }
 
-struct tnode* makeAssignmentNode(int nodeid, char c, struct tnode* l, struct tnode* r)
+struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
-	return createTree(-1,-1,-1,nodeid,l,r);
+	return createTree(-1,-1,-1,nodetype,l,r);
 }
 	
-struct tnode* makeOperatorNode(int nodeid, char c,struct tnode *l,struct tnode *r)
+struct tnode* makeOperatorNode(int nodetype, char c,struct tnode *l,struct tnode *r)
 {
-	return createTree(-1,-1,-1,nodeid,l,r);
+	return createTree(-1,-1,-1,nodetype,l,r);
 }
 	
 	/*int evaluate(struct tnode *t){
