@@ -1,0 +1,5 @@
+a.out
+lex.yy.c
+targetfile.xsm
+y.tab.c
+y.tab.h
