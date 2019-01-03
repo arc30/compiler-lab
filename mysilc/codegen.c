@@ -109,9 +109,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == CONNECTOR)
 	{
 		codeGen(t->left, target_file);
-		freeAllReg();
+		freeReg();
 		codeGen(t->right, target_file);
-		freeAllReg();
+		freeReg();
 		return -1;
 	}
 
