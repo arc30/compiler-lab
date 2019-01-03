@@ -40,7 +40,7 @@ void checkTypeIfElse(int guardType, int thenType, int elseType )
 
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	//checkType(typeless,typeless,-1, l->type, r->type, -1);
+	checkType(typeless,typeless,-1, l->type, r->type, -1);
 	return createTree(-1,typeless,-1,nodetype,l,r, NULL);
 }
 
@@ -50,7 +50,7 @@ Convention is to make LEFT child always null
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-	//checkType(-1,inttype,-1, -1,lr->type,-1)
+	checkType(-1,inttype,-1, -1,lr->type,-1);
 	return createTree(-1,typeless,-1,nodetype,NULL,lr,NULL);
 }
 
@@ -58,7 +58,7 @@ struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
 		//TODO 
 		//HOW TO CHECK TYPE? BOOL EXPR AND INT EXPR ACCEPTED 
-		return createTree(-1,-1,-1,nodetype,NULL,lr,NULL);
+		return createTree(-1,typeless,-1,nodetype,NULL,lr,NULL);
 }
 
 struct tnode* makeLeafNodeVar(int nodetype, char ch, int type)

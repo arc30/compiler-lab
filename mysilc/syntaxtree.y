@@ -30,11 +30,11 @@
 	
 	program : BEG slist END 
 	{		
-		printf("Generating AST, inorderForm is: \n");
-		inorderForm($2);
-	//	printf("Calling codegen \n");
-	//	FILE *fptr = fopen("targetfile.xsm","w");
-	//	codeGenXsm($2, fptr);
+		//printf("Generating AST, inorderForm is: \n");
+		//inorderForm($2);
+		printf("Evaluating AST \n");
+	
+		evaluateAst($2);
 		exit(1);
 	}
 	|BEG END {printf("No statements\n"); exit(1); }	
@@ -122,12 +122,12 @@
 			$$ = makeOperatorNode(LESSTHAN_EQUAL, booltype, $1, $3);
 		}
 
-	|expr EQUAL expr
+	| expr EQUAL expr
 		{
 			$$ = makeOperatorNode(EQUAL, booltype, $1, $3);
 		}
 
-	|expr NOTEQUAL expr
+	| expr NOTEQUAL expr
 		{
 			$$ = makeOperatorNode(NOTEQUAL,booltype, $1, $3);
 		}
