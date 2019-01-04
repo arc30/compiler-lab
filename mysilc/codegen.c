@@ -34,6 +34,12 @@ int getVarPos(char ch)
 	return 4096+index;
 }
 
+int getLabel()
+{
+	static int label = 0;
+	return label++;
+}
+
 int codeGen(struct tnode* t, FILE* target_file)
 {
 	//if leaf node ie number
@@ -109,9 +115,39 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == CONNECTOR)
 	{
 		codeGen(t->left, target_file);
-		freeAllReg();
+		freeReg();
 		codeGen(t->right, target_file);
-		freeAllReg();
+		freeReg();
+		return -1;
+	}
+
+	else if(t->nodetype == IF)
+	{
+		int label_1 = getLabel();
+		codeGen(t->left, target_file);
+		fprintf(target_file, "JZ L%d\n", label_1); //out of if's body
+		codeGen(t->right, target_file);
+		fprintf(target_file, "L%d:\n", label_1);
+
+		return -1;
+	}
+
+/*	else if(t->nodetype == IFELSE)
+	{
+			TO DO
+	}
+*/
+	else if(t->nodetype == WHILE)
+	{
+		int label_1=getLabel();
+		int label_2=getLabel();
+		fprintf(target_file, "L%d:\n", label_1);
+		codeGen(t->left, target_file);	//code of guard
+		fprintf(target_file, "JZ L%d\n", label_2);	//jmp to label2 if guard evaluates to false
+		codeGen(t->right, target_file);
+		fprintf(target_file, "JMP L%d\n", label_1);
+		fprintf(target_file, "L%d:\n", label_2);
+
 		return -1;
 	}
 
@@ -134,7 +170,32 @@ int codeGen(struct tnode* t, FILE* target_file)
 			
 			case DIV:	fprintf(target_file, "DIV R%d, R%d\n", reg1, reg2);
 						break;
-		
+
+			case GREATERTHAN_EQUAL:	
+						fprintf(target_file, "GE R%d, R%d\n", reg1, reg2);
+						break;
+
+			case GREATERTHAN:	
+						fprintf(target_file, "GT R%d, R%d\n", reg1, reg2);
+						break;
+
+			case LESSTHAN_EQUAL:	
+						fprintf(target_file, "LE R%d, R%d\n", reg1, reg2);
+						break;
+
+			case LESSTHAN:	
+						fprintf(target_file, "LT R%d, R%d\n", reg1, reg2);
+						break;
+
+			case EQUAL:	
+						fprintf(target_file, "EQ R%d, R%d\n", reg1, reg2);
+						break;
+
+			case NOTEQUAL:	
+						fprintf(target_file, "NE R%d, R%d\n", reg1, reg2);
+						break;
+
+
 			default : 	printf("INVALID OPERATOR");
 						exit(1);				
 		}

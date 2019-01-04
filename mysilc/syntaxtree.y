@@ -18,9 +18,7 @@
 %}
 	
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
-	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE
-	%token GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL EQUAL NOTEQUAL
-	%token PLUS MINUS MUL DIV ASSGN
+	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
@@ -32,9 +30,9 @@
 	{		
 		printf("Generating AST, inorderForm is: \n");
 		inorderForm($2);
-	//	printf("Calling codegen \n");
-	//	FILE *fptr = fopen("targetfile.xsm","w");
-	//	codeGenXsm($2, fptr);
+		printf("Calling codegen \n");
+		FILE *fptr = fopen("targetfile.xsm","w");
+		codeGenXsm($2, fptr);
 		exit(1);
 	}
 	|BEG END {printf("No statements\n"); exit(1); }	
@@ -162,6 +160,6 @@ int main(int argc, char** argv)
 	}
 	yyparse();
 	return 0;
-	}
+}
 
 
