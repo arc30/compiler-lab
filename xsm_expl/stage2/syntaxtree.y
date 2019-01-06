@@ -21,7 +21,7 @@
 	%token PLUS MINUS MUL DIV ASSGN
 	%left PLUS MINUS
 	%left MUL DIV
-	%right ASSGN
+	
 	%%
 	
 	program : BEG slist END 
