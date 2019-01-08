@@ -1,8 +1,8 @@
 begin
 read(a);
 
-if (1<2) then write(a); endif;
-write(a+5);
+if (a<2) then write(a+1); endif;
+
 
 while(a!=0)
 do

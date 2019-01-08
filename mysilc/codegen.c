@@ -64,42 +64,43 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 		char varname = t->right->varname;
 		int varPos = getVarPos(varname);
-		fprintf(target_file, "MOV R0, \"Read\"\n");		
-		fprintf(target_file, "PUSH R0 \n");  	
-		fprintf(target_file, "MOV R0, -1 \n");
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "MOV R0, %d \n", varPos);
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"Read\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "MOV R%d, -1 \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "MOV R%d, %d \n",reg0, varPos);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "CALL 0 \n");
-		fprintf(target_file, "POP R0 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
 		return -1;
 		
 	}
 
 	else if(t->nodetype == WRITE)
 	{
-		fprintf(target_file, "MOV R0, \"Write\"\n");		
-		fprintf(target_file, "PUSH R0 \n");  	
-		fprintf(target_file, "MOV R0, -2 \n");
-		fprintf(target_file, "PUSH R0 \n");
 
 		int reg1 = codeGen(t->right, target_file);
-
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"Write\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "MOV R%d, -2 \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "PUSH R%d \n", reg1);
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "CALL 0 \n");
-		fprintf(target_file, "POP R0 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
 		freeReg();
 		return -1;
 	}
