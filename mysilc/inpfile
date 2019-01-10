@@ -1,13 +1,13 @@
 begin
-read(a);
 
-if (a<2) then write(a+1); endif;
+read(n);
+s=0;
 
-
-while(a!=0)
-do
-    s=s+a;
-    read(a);
+while (n!=0) do
+    s=s+n;
+    read(n);
 endwhile;
+
 write(s);
+
 end

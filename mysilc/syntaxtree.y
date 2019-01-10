@@ -36,6 +36,7 @@
 		exit(1);
 	}
 	|BEG END {printf("No statements\n"); exit(1); }	
+	
 	;
 	
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }

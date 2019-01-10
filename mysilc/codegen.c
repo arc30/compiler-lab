@@ -22,10 +22,7 @@ void freeReg()
 	freeRegister--;
 }	
 
-void freeAllReg()
-{
-	freeRegister = 0;
-}
+
 
 //returns stackPos for variable
 int getVarPos(char ch)
@@ -125,26 +122,41 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == IF)
 	{
 		int label_1 = getLabel();
-		codeGen(t->left, target_file);
-		fprintf(target_file, "JZ L%d\n", label_1); //out of if's body
+		int reg1 = codeGen(t->left, target_file);
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
 		codeGen(t->right, target_file);
 		fprintf(target_file, "L%d:\n", label_1);
 
 		return -1;
 	}
 
-/*	else if(t->nodetype == IFELSE)
+	else if(t->nodetype == IFELSE)
 	{
-			TO DO
+		int label_1 = getLabel();
+		int label_2 = getLabel();
+		int reg1 = codeGen(t->left, target_file);
+
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
+		codeGen(t->right, target_file);
+		fprintf(target_file, "JMP L%d\n", label_2);
+
+
+		fprintf(target_file, "L%d:\n", label_1);	//else body starts
+		codeGen(t->elseptr, target_file);
+
+		fprintf(target_file, "L%d:\n", label_2);	//end of else
+
+		return -1;
+
 	}
-*/
+
 	else if(t->nodetype == WHILE)
 	{
 		int label_1=getLabel();
 		int label_2=getLabel();
 		fprintf(target_file, "L%d:\n", label_1);
-		codeGen(t->left, target_file);	//code of guard
-		fprintf(target_file, "JZ L%d\n", label_2);	//jmp to label2 if guard evaluates to false
+		int reg1 = codeGen(t->left, target_file);	//code of guard
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_2);	//jmp to label2 if guard evaluates to false
 		codeGen(t->right, target_file);
 		fprintf(target_file, "JMP L%d\n", label_1);
 		fprintf(target_file, "L%d:\n", label_2);

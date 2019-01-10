@@ -37,8 +37,11 @@ label "L"[0-9]+
                     { 
                         char* string = malloc(yyleng);
                         strncpy(string, yytext, yyleng-2);
-                        saveLabelAddr(string);
                         printf("a label decl found at %d  \n", lineNumber) ;
+
+                        saveLabelAddr(string);
+                       // lineNumber++;
+
                     }
                     else if (pass == 2)
                     {
@@ -89,7 +92,7 @@ void saveLabelAddr(char* s)
     node* temp = (node*)malloc(sizeof(node));
     strcpy(temp->name, s);
     temp->addr = 2056 + 2*(lineNumber - 9);
-    lineNumber--;
+   // lineNumber--;
     temp->next = NULL;
 
     if(!head)
