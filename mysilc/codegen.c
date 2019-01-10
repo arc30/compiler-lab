@@ -4,6 +4,49 @@
 
 static int freeRegister=0;
 
+int loopStack[20];	//for keeping track of loop begin and end : for breakstmt
+int top=-1; 			//top for loop stack
+
+void loopStackPush(int l1, int l2)
+{
+	if(top>=19)
+	{
+		printf("loopStack Limit exceeded\n abort");
+		exit(1);
+	}
+	top++;
+	loopStack[top]=l1;
+	top++;
+	loopStack[top]=l2;
+
+}
+
+void loopStackPop()
+{
+	if(top==-1)
+	{
+		return;
+	}
+	top-=2;
+}
+
+int isEmptyLoopStack()
+{
+	if(top==-1)
+		return 1;
+	return 0;
+}
+
+int loopStackTopBegin()			// return begin label of loop. 1 if l1
+{
+	return loopStack[top-1];
+}
+
+int loopStackTopEnd()
+{
+	return loopStack[top];
+}
+
 int getReg()
 {
 	if(freeRegister > 19)
@@ -153,14 +196,32 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 	else if(t->nodetype == WHILE)
 	{
-		int label_1=getLabel();
-		int label_2=getLabel();
+		int label_1=getLabel();	//begin label
+		int label_2=getLabel();	//end label
+
+		//push
+		loopStackPush(label_1,label_2);
+
 		fprintf(target_file, "L%d:\n", label_1);
 		int reg1 = codeGen(t->left, target_file);	//code of guard
 		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_2);	//jmp to label2 if guard evaluates to false
 		codeGen(t->right, target_file);
 		fprintf(target_file, "JMP L%d\n", label_1);
 		fprintf(target_file, "L%d:\n", label_2);
+
+		loopStackPop();
+
+		return -1;
+	}
+
+	else if(t->nodetype == BREAK)
+	{
+	
+		if(!isEmptyLoopStack())	//breakstmt found inside loop
+		{
+			int label_1 = loopStackTopEnd();
+			fprintf(target_file, "JMP L%d\n", label_1);
+		}
 
 		return -1;
 	}

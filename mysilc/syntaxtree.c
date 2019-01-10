@@ -103,24 +103,12 @@ struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 	checkType(booltype,typeless,-1, l->type,r->type,-1);
 	createTree(-1, typeless, -1, nodetype, l, r, NULL);
 }	
-	/*int evaluate(struct tnode *t){
-	if(t->op == NULL){
-	return t->val;
-	}
-	else{
-	switch(*(t->op)){
-	case '+' : return evaluate(t->left) + evaluate(t->right);
-	break;
-	case '-' : return evaluate(t->left) - evaluate(t->right);
-	break;
-	case '*' : return evaluate(t->left) * evaluate(t->right);
-	break;
-	case '/' : return evaluate(t->left) / evaluate(t->right);
-	break;
-	}
-	}
-	}
-	*/
+
+tnode* makeBreakNode(int nodetype)
+{
+	createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+}
+
 	void printValue(struct tnode *t)
 	{
 		
@@ -168,7 +156,7 @@ struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 				printf("< ");
 				break;
 			case EQUAL:
-				printf("= ");
+				printf("== ");
 				break;
 			case NOTEQUAL:
 				printf("!= ");
@@ -181,6 +169,9 @@ struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 				break;
 			case IF:
 				printf("IF ");
+				break;
+			case BREAK:
+				printf("BREAK ");
 				break;
 
 

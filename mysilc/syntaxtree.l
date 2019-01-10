@@ -41,6 +41,7 @@
 "while"	{return WHILE;}
 "do"	{return DO;}
 "endwhile"	{return ENDWHILE;}
+"break"	{return BREAK;}
 
 
 . {yyerror("unknown character\n");exit(1);}
