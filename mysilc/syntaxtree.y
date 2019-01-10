@@ -16,6 +16,8 @@
 	extern FILE *yyin;
 	
 %}
+
+%error-verbose
 	
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN
@@ -35,10 +37,9 @@
 		codeGenXsm($2, fptr);
 		exit(1);
 	}
-	|BEG END {printf("No statements\n"); exit(1); }	
-	
+	|	BEG END {printf("No statements\n"); exit(1); }	
 	;
-	
+
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }
 	| stmt	{ $$ = $1;	}
 	;
