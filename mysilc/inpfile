@@ -1,18 +1,14 @@
 begin
 
 read(n);
+s=0;
 
+while (n!=0) do
+    s=s+n;
+    read(n);
+    if(n==3) then break; endif;
+endwhile;
 
-repeat
-
-n=n-1;
-
-if(n==2)
-then continue; endif;
-write(n);
-
-until (n<0);
-
-
+write(s);
 
 end
