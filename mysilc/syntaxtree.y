@@ -30,8 +30,8 @@
 	
 	program : BEG slist END 
 	{		
-		//printf("Generating AST, inorderForm is: \n");
-		//inorderForm($2);
+		printf("Generating AST, inorderForm is: \n");
+		inorderForm($2);
 		printf("Evaluating AST \n");
 	
 		evaluateAst($2);
