@@ -1,12 +1,31 @@
-begin
-a=3;
-b=5;
+if(a>b)then 
+    if (a>c) then
+        if(a>d) then
+            ans = a;
+        endif;
+    endif;
+endif;
 
-while (a <= b)
-do
-a=a+1;
-write(a);
-endwhile;
+if (b>a) then 
+    if (b>c) then
+        if(b>d) then
+            ans = b;
+        endif;
+    endif;
+endif;
 
+if (c>a) then 
+    if (c>b) then
+        if(c>d) then
+            ans = c;
+        endif;
+    endif;
+endif;
 
-end
+if (d>a) then 
+    if (d>b) then
+        if(d>c) then
+            ans = d;
+        endif;
+    endif;
+endif;
