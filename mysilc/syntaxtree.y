@@ -20,7 +20,7 @@
 %error-verbose
 	
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
-	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK
+	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	
 
 	%left EQUAL NOTEQUAL
@@ -51,6 +51,7 @@
 		| ifstmt 	{ $$=$1; }
 		| whilestmt { $$=$1; }
 		| breakstmt {$$=$1;}
+		| continuestmt	{$$=$1;}
 	;
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
@@ -78,6 +79,12 @@
 	breakstmt : BREAK ';'
 				{
 					$$ = makeBreakNode(BREAK);
+				}
+			;
+
+	continuestmt	:	CONTINUE ';'
+				{
+					$$ = makeContinueNode(CONTINUE);
 				}
 			;
 

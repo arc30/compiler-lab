@@ -4,8 +4,9 @@ read(n);
 s=0;
 
 while (n!=0) do
+    if(n==5) then n=6; continue; endif;
     s=s+n;
-    if(n==5) then break; endif;
+    
     read(n);
 endwhile;
 

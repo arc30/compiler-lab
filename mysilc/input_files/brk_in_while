@@ -1,0 +1,15 @@
+begin
+
+read(n);
+s=0;
+
+while (n!=0) do
+    s=s+n;
+    if(n==5) then break; endif;
+    read(n);
+endwhile;
+
+
+write(s);
+
+end

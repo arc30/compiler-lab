@@ -109,6 +109,11 @@ tnode* makeBreakNode(int nodetype)
 	createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
 }
 
+tnode* makeContinueNode(int nodetype)
+{
+	createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+}
+
 	void printValue(struct tnode *t)
 	{
 		
@@ -172,6 +177,9 @@ tnode* makeBreakNode(int nodetype)
 				break;
 			case BREAK:
 				printf("BREAK ");
+				break;
+			case CONTINUE:
+				printf("CONTINUE ");
 				break;
 
 

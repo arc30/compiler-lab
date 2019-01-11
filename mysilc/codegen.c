@@ -226,6 +226,15 @@ int codeGen(struct tnode* t, FILE* target_file)
 		return -1;
 	}
 
+	else if(t->nodetype == CONTINUE)
+	{
+		if(!isEmptyLoopStack())	//called inside a loop
+		{
+			int label_1 = loopStackTopBegin();
+			fprintf(target_file, "JMP L%d\n", label_1);
+		}
+		return -1;
+	}
 	else 
 	//if(t->nodetype == PLUS || t->nodetype == MINUS || t->nodetype == MUL || t->nodetype == DIV)
 	{
