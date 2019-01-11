@@ -1,11 +1,5 @@
 begin
-read(n);
-s=0;
-while(n!=0)
-do
-s=s+n;
-n=n-1;
-endwhile;
-write(s);
+read(a);
+write(a);
 
 end
