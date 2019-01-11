@@ -214,6 +214,26 @@ int codeGen(struct tnode* t, FILE* target_file)
 		return -1;
 	}
 
+	else if(t->nodetype == REPEAT)
+	{
+		int label_1 = getLabel();
+		int label_2 = getLabel();
+
+		loopStackPush(label_1,label_2);
+
+		fprintf(target_file, "L%d:\n", label_1);
+		codeGen(t->left, target_file);
+		int reg1 = codeGen(t->right, target_file); 	//code of guard expr
+		fprintf(target_file, "JNZ R%d, L%d\n", reg1, label_2);	//jmp to end if guard evaluates to true
+		fprintf(target_file, "JMP L%d\n", label_1);
+		fprintf(target_file, "L%d:\n", label_2);
+
+		loopStackPop();
+
+		return -1;
+
+	}
+
 	else if(t->nodetype == BREAK)
 	{
 	

@@ -21,6 +21,7 @@
 	
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
+	%token REPEAT UNTIL
 	
 
 	%left EQUAL NOTEQUAL
@@ -50,6 +51,7 @@
 		| assgnstmt {$$=$1;}
 		| ifstmt 	{ $$=$1; }
 		| whilestmt { $$=$1; }
+		| repeatuntilstmt	{$$ =$1;}
 		| breakstmt {$$=$1;}
 		| continuestmt	{$$=$1;}
 	;
@@ -75,7 +77,13 @@
 					$$ = makeWhileNode(WHILE, $3, $6);
 				}
 			;
-
+	
+	repeatuntilstmt : REPEAT slist UNTIL '(' expr ')' ';'
+				{
+					$$ = makeRepeatNode(REPEAT, $2, $5 );
+				}
+			;
+			
 	breakstmt : BREAK ';'
 				{
 					$$ = makeBreakNode(BREAK);

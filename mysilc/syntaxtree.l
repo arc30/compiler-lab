@@ -43,6 +43,9 @@
 "endwhile"	{return ENDWHILE;}
 "break"	{return BREAK;}
 "continue"	{return CONTINUE;}
+"repeat"	{return REPEAT;}
+"until"		{return UNTIL;}
+
 
 . {yyerror("unknown character\n");exit(1);}
 	

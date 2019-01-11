@@ -101,17 +101,23 @@ struct tnode* makeIfThenNode(int nodetype, struct tnode* l, struct tnode* r)
 struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 {
 	checkType(booltype,typeless,-1, l->type,r->type,-1);
-	createTree(-1, typeless, -1, nodetype, l, r, NULL);
+	return createTree(-1, typeless, -1, nodetype, l, r, NULL);
 }	
+
+tnode* makeRepeatNode(int nodetype, tnode* l, tnode* r)	//repeat-until. left is slist, right is expr
+{
+	checkType(typeless,booltype,-1, l->type,r->type,-1);
+	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+}
 
 tnode* makeBreakNode(int nodetype)
 {
-	createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
 }
 
 tnode* makeContinueNode(int nodetype)
 {
-	createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
 }
 
 	void printValue(struct tnode *t)
@@ -181,7 +187,9 @@ tnode* makeContinueNode(int nodetype)
 			case CONTINUE:
 				printf("CONTINUE ");
 				break;
-
+			case REPEAT:
+				printf("REPEAT UNTIL ");
+				break;
 
 
 			default:
