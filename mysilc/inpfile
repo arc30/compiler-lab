@@ -6,38 +6,37 @@ read(d);
 
 s=0;
 
-if(a>=b)then 
-    if (a>=c) then
-        if(a>=d) then
-            s = a;
-        endif;
-    endif;
-endif;
 
-if (b>=a) then 
-    if (b>=c) then
-        if(b>=d) then
-            s = b;
-        endif;
-    endif;
-endif;
-
-if (c>=a) then 
-    if (c>=b) then
-        if(c>=d) then
+if(a<=b)then 
+    if (b<=c) then
+        if(c<=d) then
+            s = d;
+        else
             s = c;
         endif;
+    else    
+        if(b<=d) then
+            s=d;
+        else    
+            s=b;
+        endif;   
+    endif;
+else
+    if (a<=c) then
+            if(c<=d) then
+                s = d;
+            else
+                s = c;
+            endif;
+    else    
+            if(a<=d) then
+                s=d;
+            else    
+                s=a;
+            endif;   
     endif;
 endif;
-
-if (d>=a) then 
-    if (d>=b) then
-        if(d>=c) then
-            s = d;
-        endif;
-    endif;
-endif;
-
+    
 write(s);
 
 end
