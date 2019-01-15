@@ -4,6 +4,49 @@
 
 static int freeRegister=0;
 
+int loopStack[20];	//for keeping track of loop begin and end : for breakstmt
+int top=-1; 			//top for loop stack
+
+void loopStackPush(int l1, int l2)
+{
+	if(top>=19)
+	{
+		printf("loopStack Limit exceeded\n abort");
+		exit(1);
+	}
+	top++;
+	loopStack[top]=l1;
+	top++;
+	loopStack[top]=l2;
+
+}
+
+void loopStackPop()
+{
+	if(top==-1)
+	{
+		return;
+	}
+	top-=2;
+}
+
+int isEmptyLoopStack()
+{
+	if(top==-1)
+		return 1;
+	return 0;
+}
+
+int loopStackTopBegin()			// return begin label of loop. 1 if l1
+{
+	return loopStack[top-1];
+}
+
+int loopStackTopEnd()
+{
+	return loopStack[top];
+}
+
 int getReg()
 {
 	if(freeRegister > 19)
@@ -22,16 +65,38 @@ void freeReg()
 	freeRegister--;
 }	
 
-void freeAllReg()
-{
-	freeRegister = 0;
-}
+
 
 //returns stackPos for variable
 int getVarPos(char ch)
 {
 	int index=ch-'a';
 	return 4096+index;
+}
+
+int getLabel()
+{
+	static int label = 0;
+	return label++;
+}
+
+void pushAllRegisters(FILE* target_file)
+{
+	int i;
+	for(i=0; i<freeRegister; i++)
+	{
+		fprintf(target_file, "PUSH R%d \n",i);
+	}
+}
+
+void popAllRegisters(FILE* target_file)
+{
+	int i;
+	for(i=0; i<freeRegister; i++)
+	{
+		fprintf(target_file, "POP R%d \n",i);
+	}
+
 }
 
 int codeGen(struct tnode* t, FILE* target_file)
@@ -58,42 +123,56 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 		char varname = t->right->varname;
 		int varPos = getVarPos(varname);
-		fprintf(target_file, "MOV R0, \"Read\"\n");		
-		fprintf(target_file, "PUSH R0 \n");  	
-		fprintf(target_file, "MOV R0, -1 \n");
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "MOV R0, %d \n", varPos);
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
+		
+		pushAllRegisters(target_file);
+		
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"Read\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "MOV R%d, -1 \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "MOV R%d, %d \n",reg0, varPos);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "CALL 0 \n");
-		fprintf(target_file, "POP R0 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		
+		popAllRegisters(target_file);
+
+		freeReg();
 		return -1;
 		
 	}
 
 	else if(t->nodetype == WRITE)
 	{
-		fprintf(target_file, "MOV R0, \"Write\"\n");		
-		fprintf(target_file, "PUSH R0 \n");  	
-		fprintf(target_file, "MOV R0, -2 \n");
-		fprintf(target_file, "PUSH R0 \n");
 
 		int reg1 = codeGen(t->right, target_file);
 
+		pushAllRegisters(target_file);
+
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"Write\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "MOV R%d, -2 \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "PUSH R%d \n", reg1);
-		fprintf(target_file, "PUSH R0 \n");
-		fprintf(target_file, "PUSH R0 \n");
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "CALL 0 \n");
-		fprintf(target_file, "POP R0 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
-		fprintf(target_file, "POP R1 \n");
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+
+		popAllRegisters(target_file);
+
 		freeReg();
 		return -1;
 	}
@@ -103,6 +182,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		int varPos = getVarPos(varname);
 		int reg1 = codeGen(t->right, target_file);
 		fprintf(target_file, "MOV [%d], R%d\n ", varPos, reg1);
+		freeReg();
 		return -1;
 	}
 	
@@ -115,6 +195,104 @@ int codeGen(struct tnode* t, FILE* target_file)
 		return -1;
 	}
 
+	else if(t->nodetype == IF)
+	{
+		int label_1 = getLabel();
+		int reg1 = codeGen(t->left, target_file);
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
+		codeGen(t->right, target_file);
+		fprintf(target_file, "L%d:\n", label_1);
+		freeReg();
+
+		return -1;
+	}
+
+	else if(t->nodetype == IFELSE)
+	{
+		int label_1 = getLabel();
+		int label_2 = getLabel();
+		int reg1 = codeGen(t->left, target_file);
+
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
+		codeGen(t->right, target_file);
+		fprintf(target_file, "JMP L%d\n", label_2);
+
+
+		fprintf(target_file, "L%d:\n", label_1);	//else body starts
+		codeGen(t->elseptr, target_file);
+
+		fprintf(target_file, "L%d:\n", label_2);	//end of else
+
+		freeReg();
+		freeReg();
+
+		return -1;
+
+	}
+
+	else if(t->nodetype == WHILE)
+	{
+		int label_1=getLabel();	//begin label
+		int label_2=getLabel();	//end label
+
+		//push
+		loopStackPush(label_1,label_2);
+
+		fprintf(target_file, "L%d:\n", label_1);
+		int reg1 = codeGen(t->left, target_file);	//code of guard
+		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_2);	//jmp to label2 if guard evaluates to false
+		codeGen(t->right, target_file);
+		fprintf(target_file, "JMP L%d\n", label_1);
+		fprintf(target_file, "L%d:\n", label_2);
+
+		loopStackPop();
+	
+		freeReg();
+		return -1;
+	}
+
+	else if(t->nodetype == REPEAT)
+	{
+		int label_1 = getLabel();
+		int label_2 = getLabel();
+
+		loopStackPush(label_1,label_2);
+
+		fprintf(target_file, "L%d:\n", label_1);
+		codeGen(t->left, target_file);
+		int reg1 = codeGen(t->right, target_file); 	//code of guard expr
+		fprintf(target_file, "JNZ R%d, L%d\n", reg1, label_2);	//jmp to end if guard evaluates to true
+		fprintf(target_file, "JMP L%d\n", label_1);
+		fprintf(target_file, "L%d:\n", label_2);
+
+		loopStackPop();
+
+		freeReg();
+		return -1;
+
+	}
+
+	else if(t->nodetype == BREAK)
+	{
+	
+		if(!isEmptyLoopStack())	//breakstmt found inside loop
+		{
+			int label_1 = loopStackTopEnd();
+			fprintf(target_file, "JMP L%d\n", label_1);
+		}
+
+		return -1;
+	}
+
+	else if(t->nodetype == CONTINUE)
+	{
+		if(!isEmptyLoopStack())	//called inside a loop
+		{
+			int label_1 = loopStackTopBegin();
+			fprintf(target_file, "JMP L%d\n", label_1);
+		}
+		return -1;
+	}
 	else 
 	//if(t->nodetype == PLUS || t->nodetype == MINUS || t->nodetype == MUL || t->nodetype == DIV)
 	{
@@ -134,7 +312,32 @@ int codeGen(struct tnode* t, FILE* target_file)
 			
 			case DIV:	fprintf(target_file, "DIV R%d, R%d\n", reg1, reg2);
 						break;
-		
+
+			case GREATERTHAN_EQUAL:	
+						fprintf(target_file, "GE R%d, R%d\n", reg1, reg2);
+						break;
+
+			case GREATERTHAN:	
+						fprintf(target_file, "GT R%d, R%d\n", reg1, reg2);
+						break;
+
+			case LESSTHAN_EQUAL:	
+						fprintf(target_file, "LE R%d, R%d\n", reg1, reg2);
+						break;
+
+			case LESSTHAN:	
+						fprintf(target_file, "LT R%d, R%d\n", reg1, reg2);
+						break;
+
+			case EQUAL:	
+						fprintf(target_file, "EQ R%d, R%d\n", reg1, reg2);
+						break;
+
+			case NOTEQUAL:	
+						fprintf(target_file, "NE R%d, R%d\n", reg1, reg2);
+						break;
+
+
 			default : 	printf("INVALID OPERATOR");
 						exit(1);				
 		}

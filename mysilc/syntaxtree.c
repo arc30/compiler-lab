@@ -4,22 +4,44 @@
 #include <stdio.h>
 
 
-struct tnode* createTree(int val, int type, char c, int nodetype, struct tnode* l, struct tnode* r )
+struct tnode* createTree(int val, int type, char c, int nodetype, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->val = val;
 	temp->type = type;
-	//temp->varname = malloc(sizeof(char));
 	temp->varname = c;
 	temp->nodetype = nodetype;
 	temp->left=l;
 	temp->right=r;
+	temp->elseptr = elseptr;
+}
+
+void checkType(int expectedOperand1Type, int expectedOperand2Type, int expectedOperand3Type, int operand1type, int operand2type, int operand3type)
+{
+	if (operand1type != expectedOperand1Type || operand2type != expectedOperand2Type || operand3type != expectedOperand3Type)
+	{
+		printf("Error: Type mismatch\n ");
+		exit(1);
+	}
+	return;
+}
+
+void checkTypeIfElse(int guardType, int thenType, int elseType )
+{
+	if(guardType != booltype || thenType != typeless || elseType!=typeless)
+	{
+		printf("Error: Type mismatch ifElseThen\n ");
+		exit(1);
+	}
+	return;
+	
 }
 
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	return createTree(-1,-1,-1,nodetype,l,r);
+	//checkType(typeless,typeless,-1, l->type, r->type, -1);
+	return createTree(-1,typeless,-1,nodetype,l,r, NULL);
 }
 
 /*read and write nodes have only one child. 
@@ -28,53 +50,76 @@ Convention is to make LEFT child always null
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-	return createTree(-1,-1,-1,nodetype,NULL,lr);
+	//checkType(-1,inttype,-1, -1,lr->type,-1)
+	return createTree(-1,typeless,-1,nodetype,NULL,lr,NULL);
 }
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
-		return createTree(-1,-1,-1,nodetype,NULL,lr);
+		//TODO 
+		//HOW TO CHECK TYPE? BOOL EXPR AND INT EXPR ACCEPTED 
+		return createTree(-1,-1,-1,nodetype,NULL,lr,NULL);
 }
 
-struct tnode* makeLeafNodeVar(int nodetype, char ch)
+struct tnode* makeLeafNodeVar(int nodetype, char ch, int type)
 {
-	return createTree(-1,-1,ch,nodetype,NULL,NULL);
+	
+	return createTree(-1,type,ch,nodetype,NULL,NULL,NULL);
 }
 
 
-struct tnode* makeLeafNodeNum(int nodetype, int n)
+struct tnode* makeLeafNodeNum(int nodetype, int n, int type)
 {
-	return createTree(n,-1,-1,nodetype,NULL,NULL);
+	return createTree(n,type,-1,nodetype,NULL,NULL,NULL);
 }
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
-	return createTree(-1,-1,-1,nodetype,l,r);
+	checkType(inttype,inttype,-1, l->type,r->type,-1);
+	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
 }
 	
-struct tnode* makeOperatorNode(int nodetype, char c,struct tnode *l,struct tnode *r)
+struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tnode *r)
 {
-	return createTree(-1,-1,-1,nodetype,l,r);
+	checkType(inttype, inttype, -1, l->type, r->type,-1);
+	return createTree(-1,type,-1,nodetype,l,r,NULL);
 }
-	
-	/*int evaluate(struct tnode *t){
-	if(t->op == NULL){
-	return t->val;
-	}
-	else{
-	switch(*(t->op)){
-	case '+' : return evaluate(t->left) + evaluate(t->right);
-	break;
-	case '-' : return evaluate(t->left) - evaluate(t->right);
-	break;
-	case '*' : return evaluate(t->left) * evaluate(t->right);
-	break;
-	case '/' : return evaluate(t->left) / evaluate(t->right);
-	break;
-	}
-	}
-	}
-	*/
+
+struct tnode* makeIfThenElseNode(int nodetype,struct tnode* l, struct tnode* r, struct tnode* elseptr)
+{
+	checkTypeIfElse(l->type, r->type, elseptr->type);
+	return createTree(-1, typeless, -1, nodetype, l, r, elseptr);	
+}
+
+struct tnode* makeIfThenNode(int nodetype, struct tnode* l, struct tnode* r)
+{
+	checkTypeIfElse(l->type, r->type, typeless);
+
+	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+}	
+
+struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
+{
+	checkType(booltype,typeless,-1, l->type,r->type,-1);
+	return createTree(-1, typeless, -1, nodetype, l, r, NULL);
+}	
+
+tnode* makeRepeatNode(int nodetype, tnode* l, tnode* r)	//repeat-until. left is slist, right is expr
+{
+	checkType(typeless,booltype,-1, l->type,r->type,-1);
+	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+}
+
+tnode* makeBreakNode(int nodetype)
+{
+	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+}
+
+tnode* makeContinueNode(int nodetype)
+{
+	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+}
+
 	void printValue(struct tnode *t)
 	{
 		
@@ -109,6 +154,44 @@ struct tnode* makeOperatorNode(int nodetype, char c,struct tnode *l,struct tnode
 			case ASSGN:
 				printf("= ");
 				break;
+			case GREATERTHAN_EQUAL:
+				printf(">= ");
+				break;
+			case LESSTHAN_EQUAL:
+				printf("<= ");
+				break;
+			case GREATERTHAN:
+				printf("> ");
+				break;
+			case LESSTHAN:
+				printf("< ");
+				break;
+			case EQUAL:
+				printf("== ");
+				break;
+			case NOTEQUAL:
+				printf("!= ");
+				break;
+			case WHILE:
+				printf("WHILE ");
+				break;
+			case IFELSE:
+				printf("IF THEN ELSE ");
+				break;
+			case IF:
+				printf("IF ");
+				break;
+			case BREAK:
+				printf("BREAK ");
+				break;
+			case CONTINUE:
+				printf("CONTINUE ");
+				break;
+			case REPEAT:
+				printf("REPEAT UNTIL ");
+				break;
+
+
 			default:
 				printf("unknown nodetype, %d ",t->nodetype);
 				exit(1);
@@ -119,28 +202,6 @@ struct tnode* makeOperatorNode(int nodetype, char c,struct tnode *l,struct tnode
 	
 
 	
-	void prefixForm(struct tnode* t)
-	{
-		if(t != NULL)
-		{	
-			printValue(t);
-			prefixForm(t->left);
-			prefixForm(t->right);
-		}	
-		
-	}
-	
-	void postfixForm(struct tnode* t)
-	{
-		if(t != NULL)
-		{	
-			postfixForm(t->left);
-			postfixForm(t->right);
-			printValue(t);	
-		}	
-			
-	}
-	
 	void inorderForm(struct tnode* t)
 	{
 		if(t != NULL)
@@ -148,6 +209,7 @@ struct tnode* makeOperatorNode(int nodetype, char c,struct tnode *l,struct tnode
 			inorderForm(t->left);
 			printValue(t);	
 			inorderForm(t->right);
+			inorderForm(t->elseptr);
 			
 		}	
 			

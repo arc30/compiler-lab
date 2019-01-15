@@ -1,0 +1,18 @@
+begin
+
+read(n);
+
+
+repeat
+
+n=n-1;
+
+if(n==2)
+then continue; endif;
+write(n);
+
+until (n<0);
+
+
+
+end
