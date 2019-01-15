@@ -80,6 +80,25 @@ int getLabel()
 	return label++;
 }
 
+void pushAllRegisters(FILE* target_file)
+{
+	int i;
+	for(i=0; i<freeRegister; i++)
+	{
+		fprintf(target_file, "PUSH R%d \n",i);
+	}
+}
+
+void popAllRegisters(FILE* target_file)
+{
+	int i;
+	for(i=0; i<freeRegister; i++)
+	{
+		fprintf(target_file, "POP R%d \n",i);
+	}
+
+}
+
 int codeGen(struct tnode* t, FILE* target_file)
 {
 	//if leaf node ie number
@@ -104,6 +123,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 		char varname = t->right->varname;
 		int varPos = getVarPos(varname);
+		
+		pushAllRegisters(target_file);
+		
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, \"Read\"\n", reg0);		
 		fprintf(target_file, "PUSH R%d \n", reg0);  	
@@ -119,6 +141,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "POP R%d \n", reg0);
 		fprintf(target_file, "POP R%d \n", reg0);
 		fprintf(target_file, "POP R%d \n", reg0);
+		
+		popAllRegisters(target_file);
+
+		freeReg();
 		return -1;
 		
 	}
@@ -127,6 +153,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 
 		int reg1 = codeGen(t->right, target_file);
+
+		pushAllRegisters(target_file);
+
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, \"Write\"\n", reg0);		
 		fprintf(target_file, "PUSH R%d \n", reg0);  	
@@ -141,6 +170,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "POP R%d \n", reg0);
 		fprintf(target_file, "POP R%d \n", reg0);
 		fprintf(target_file, "POP R%d \n", reg0);
+
+		popAllRegisters(target_file);
+
 		freeReg();
 		return -1;
 	}
@@ -170,6 +202,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
 		codeGen(t->right, target_file);
 		fprintf(target_file, "L%d:\n", label_1);
+		freeReg();
 
 		return -1;
 	}
@@ -189,6 +222,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 		codeGen(t->elseptr, target_file);
 
 		fprintf(target_file, "L%d:\n", label_2);	//end of else
+
+		freeReg();
+		freeReg();
 
 		return -1;
 
@@ -210,7 +246,8 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "L%d:\n", label_2);
 
 		loopStackPop();
-
+	
+		freeReg();
 		return -1;
 	}
 
@@ -230,6 +267,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 		loopStackPop();
 
+		freeReg();
 		return -1;
 
 	}
