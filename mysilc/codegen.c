@@ -174,6 +174,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		popAllRegisters(target_file);
 
 		freeReg();
+		freeReg();
 		return -1;
 	}
 	else if(t->nodetype == ASSGN)
@@ -188,10 +189,8 @@ int codeGen(struct tnode* t, FILE* target_file)
 	
 	else if(t->nodetype == CONNECTOR)
 	{
-		codeGen(t->left, target_file);
-		freeReg();
+		codeGen(t->left, target_file);	
 		codeGen(t->right, target_file);
-		freeReg();
 		return -1;
 	}
 
@@ -200,9 +199,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 		int label_1 = getLabel();
 		int reg1 = codeGen(t->left, target_file);
 		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
+		freeReg();
+
 		codeGen(t->right, target_file);
 		fprintf(target_file, "L%d:\n", label_1);
-		freeReg();
 
 		return -1;
 	}
@@ -214,17 +214,16 @@ int codeGen(struct tnode* t, FILE* target_file)
 		int reg1 = codeGen(t->left, target_file);
 
 		fprintf(target_file, "JZ R%d, L%d\n", reg1, label_1); //out of if's body
+
+		freeReg();
+
 		codeGen(t->right, target_file);
 		fprintf(target_file, "JMP L%d\n", label_2);
-
 
 		fprintf(target_file, "L%d:\n", label_1);	//else body starts
 		codeGen(t->elseptr, target_file);
 
 		fprintf(target_file, "L%d:\n", label_2);	//end of else
-
-		freeReg();
-		freeReg();
 
 		return -1;
 
@@ -362,6 +361,13 @@ void codeGenXsm(struct tnode* t, FILE* target_file)
 	//4095 + 26 for storing variables. a is in [4095+1]
 
 	int result = codeGen(t, target_file);
+	
+	if(freeRegister!=0)
+	{
+		printf("Register Leak detected !! \n");
+	}
+
+
 	printf("Generated Prog Code %d\n", result);
 
 	fprintf(target_file, "MOV R0, \"Exit\" \n");
