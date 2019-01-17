@@ -9,11 +9,15 @@
 
 	#include "syntaxtree.h"
 
+	#include "symboltable.h"
+
 	#define YYSTYPE tnode *
 	
 	extern int yylex();
 	extern int yyparse();
 	extern FILE *yyin;
+
+	int currType = NOTYPE;
 	
 %}
 
@@ -22,25 +26,58 @@
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
-	
+	%token DECL ENDDECL INT STR
+
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
 	%left PLUS MINUS
 	%left MUL DIV
-	%%
+%%
 	
+	
+	
+	start : declarations program
+		   ;
+
+	declarations : DECL declist ENDDECL		{printf("declaration list\n");
+											printSymbolTable();	
+											}
+				|	DECL ENDDECL			{printf("No decl list\n");}
+				;
+
+	declist : declist declr					{}			
+			|declr							{}
+			;
+
+	declr	:  type varlist ';'				{}
+			;
+
+	type	: INT						{ currType = INTTYPE; }
+			| STR						{ currType = STRTYPE; }
+			;
+
+	varlist	: varlist ',' ID			{
+										 install($3->varname, currType, 1); 
+										}
+			| ID						{
+										 install($1->varname, currType, 1);
+										}
+			;
+
+	
+
 	program : BEG slist END 
 	{		
-		printf("Generating AST, inorderForm is: \n");
+		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
-		printf("Calling codegen \n");
-		FILE *fptr = fopen("targetfile.xsm","w");
-		codeGenXsm($2, fptr);
-		exit(1);
 	}
 	|	BEG END {printf("No statements\n"); exit(1); }	
 	;
+
+
+	
+
 
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }
 	| stmt	{ $$ = $1;	}
@@ -98,19 +135,19 @@
 
 	expr : expr PLUS expr 
 			{
-				$$ = makeOperatorNode(PLUS,inttype,$1,$3);
+				$$ = makeOperatorNode(PLUS,INTTYPE,$1,$3);
 			}
 	| expr MINUS expr 
 			{
-				$$ = makeOperatorNode(MINUS, inttype,$1,$3);
+				$$ = makeOperatorNode(MINUS, INTTYPE,$1,$3);
 			}
 	| expr MUL expr 
 			{
-				$$ = makeOperatorNode(MUL,inttype,$1,$3);
+				$$ = makeOperatorNode(MUL,INTTYPE,$1,$3);
 			}
 	| expr DIV expr 
 			{
-				$$ = makeOperatorNode(DIV, inttype,$1,$3);
+				$$ = makeOperatorNode(DIV, INTTYPE,$1,$3);
 			}
 	| '(' expr ')' 
 			{
@@ -125,33 +162,33 @@
 		}
 	| expr GREATERTHAN expr
 		{
-			$$ = makeOperatorNode(GREATERTHAN, booltype, $1, $3);
+			$$ = makeOperatorNode(GREATERTHAN, BOOLTYPE, $1, $3);
 
 		}
 
 	| expr LESSTHAN expr
 		{
-			$$ = makeOperatorNode(LESSTHAN, booltype, $1, $3);
+			$$ = makeOperatorNode(LESSTHAN, BOOLTYPE, $1, $3);
 		}
 
 	| expr GREATERTHAN_EQUAL expr
 		{
-			$$ = makeOperatorNode(GREATERTHAN_EQUAL, booltype, $1, $3);
+			$$ = makeOperatorNode(GREATERTHAN_EQUAL, BOOLTYPE, $1, $3);
 		}
 
 	| expr LESSTHAN_EQUAL expr
 		{
-			$$ = makeOperatorNode(LESSTHAN_EQUAL, booltype, $1, $3);
+			$$ = makeOperatorNode(LESSTHAN_EQUAL, BOOLTYPE, $1, $3);
 		}
 
 	|expr EQUAL expr
 		{
-			$$ = makeOperatorNode(EQUAL, booltype, $1, $3);
+			$$ = makeOperatorNode(EQUAL, BOOLTYPE, $1, $3);
 		}
 
 	|expr NOTEQUAL expr
 		{
-			$$ = makeOperatorNode(NOTEQUAL,booltype, $1, $3);
+			$$ = makeOperatorNode(NOTEQUAL,BOOLTYPE, $1, $3);
 		}
 		
 	;
@@ -179,8 +216,9 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		printf("Required format: ./a.out <input filename> ");
+		printf("Required : ./a.out <input filename>") ;
 		return 0;
+		
 	}
 	yyparse();
 	return 0;

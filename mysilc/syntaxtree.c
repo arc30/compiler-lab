@@ -2,15 +2,25 @@
 #include "y.tab.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "symboltable.h"
 
 
-struct tnode* createTree(int val, int type, char c, int nodetype, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+struct tnode* createTree(int val, int type, char* c, int nodetype, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->val = val;
 	temp->type = type;
-	temp->varname = c;
+
+	temp->varname = NULL;
+	
+	if(c!=NULL)
+	{
+		temp->varname = (char*) malloc(strlen(c));
+		strcpy(temp->varname, c);
+	}
+
 	temp->nodetype = nodetype;
 	temp->left=l;
 	temp->right=r;
@@ -29,7 +39,7 @@ void checkType(int expectedOperand1Type, int expectedOperand2Type, int expectedO
 
 void checkTypeIfElse(int guardType, int thenType, int elseType )
 {
-	if(guardType != booltype || thenType != typeless || elseType!=typeless)
+	if(guardType != BOOLTYPE || thenType != NOTYPE || elseType!=NOTYPE)
 	{
 		printf("Error: Type mismatch ifElseThen\n ");
 		exit(1);
@@ -38,10 +48,20 @@ void checkTypeIfElse(int guardType, int thenType, int elseType )
 	
 }
 
+void endIfVariableUndeclared(Gsymbol* temp)
+{
+	if(temp==NULL)
+	{
+		printf("ERROR: Undeclared Variable\n");
+		exit(1);
+	}
+
+}
+
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	//checkType(typeless,typeless,-1, l->type, r->type, -1);
-	return createTree(-1,typeless,-1,nodetype,l,r, NULL);
+	//checkType(NOTYPE,NOTYPE,-1, l->type, r->type, -1);
+	return createTree(-1,NOTYPE,NULL,nodetype,l,r, NULL);
 }
 
 /*read and write nodes have only one child. 
@@ -50,74 +70,82 @@ Convention is to make LEFT child always null
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-	//checkType(-1,inttype,-1, -1,lr->type,-1)
-	return createTree(-1,typeless,-1,nodetype,NULL,lr,NULL);
+	//checkType(-1,INTTYPE,-1, -1,lr->type,-1)
+	return createTree(-1,NOTYPE,NULL,nodetype,NULL,lr,NULL);
 }
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
 		//TODO 
 		//HOW TO CHECK TYPE? BOOL EXPR AND INT EXPR ACCEPTED 
-		return createTree(-1,-1,-1,nodetype,NULL,lr,NULL);
+		return createTree(-1,-1,NULL,nodetype,NULL,lr,NULL);
 }
 
-struct tnode* makeLeafNodeVar(int nodetype, char ch, int type)
+struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 {
 	
+	//get type from symboltable. 
+	Gsymbol* temp;
+	temp = lookup(ch);
+
+//	endIfVariableUndeclared(temp);
+	
+//	int type = temp->type;
+int type = INTTYPE;
 	return createTree(-1,type,ch,nodetype,NULL,NULL,NULL);
 }
 
 
-struct tnode* makeLeafNodeNum(int nodetype, int n, int type)
+struct tnode* makeLeafNodeNum(int nodetype, int n)
 {
-	return createTree(n,type,-1,nodetype,NULL,NULL,NULL);
+	return createTree(n,INTTYPE,NULL,nodetype,NULL,NULL,NULL);
 }
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
-	checkType(inttype,inttype,-1, l->type,r->type,-1);
-	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+	checkType(INTTYPE,INTTYPE,-1, l->type,r->type,-1);
+	return createTree(-1,NOTYPE,NULL,nodetype,l,r,NULL);
 }
 	
 struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tnode *r)
 {
-	checkType(inttype, inttype, -1, l->type, r->type,-1);
-	return createTree(-1,type,-1,nodetype,l,r,NULL);
+	checkType(INTTYPE, INTTYPE, -1, l->type, r->type,-1);
+	return createTree(-1,type,NULL,nodetype,l,r,NULL);
 }
 
 struct tnode* makeIfThenElseNode(int nodetype,struct tnode* l, struct tnode* r, struct tnode* elseptr)
 {
 	checkTypeIfElse(l->type, r->type, elseptr->type);
-	return createTree(-1, typeless, -1, nodetype, l, r, elseptr);	
+	return createTree(-1, NOTYPE, NULL, nodetype, l, r, elseptr);	
 }
 
 struct tnode* makeIfThenNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	checkTypeIfElse(l->type, r->type, typeless);
+	checkTypeIfElse(l->type, r->type, NOTYPE);
 
-	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+	return createTree(-1,NOTYPE,NULL,nodetype,l,r,NULL);
 }	
 
 struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	checkType(booltype,typeless,-1, l->type,r->type,-1);
-	return createTree(-1, typeless, -1, nodetype, l, r, NULL);
+	checkType(BOOLTYPE,NOTYPE,-1, l->type,r->type,-1);
+	return createTree(-1, NOTYPE, NULL, nodetype, l, r, NULL);
 }	
 
 tnode* makeRepeatNode(int nodetype, tnode* l, tnode* r)	//repeat-until. left is slist, right is expr
 {
-	checkType(typeless,booltype,-1, l->type,r->type,-1);
-	return createTree(-1,typeless,-1,nodetype,l,r,NULL);
+	checkType(NOTYPE,BOOLTYPE,-1, l->type,r->type,-1);
+	return createTree(-1,NOTYPE,NULL,nodetype,l,r,NULL);
 }
 
 tnode* makeBreakNode(int nodetype)
 {
-	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,NULL);
 }
 
 tnode* makeContinueNode(int nodetype)
 {
-	return createTree(-1,typeless,-1,nodetype,NULL,NULL,NULL);
+	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,NULL);
 }
 
 	void printValue(struct tnode *t)
@@ -137,7 +165,7 @@ tnode* makeContinueNode(int nodetype)
 				printf("WRITE ");
 				break;
 			case ID:
-				printf("%c ", t->varname);
+				printf("%s ", t->varname);
 				break;
 			case PLUS:
 				printf("+ ");

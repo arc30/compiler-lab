@@ -3,16 +3,17 @@
 	#include "y.tab.h"
 	#include <stdlib.h>
 	#include "syntaxtree.h"
+	#include <string.h>
 
 	int number;
-	char varname;
+	char* varname;
 	
 %}
 	
 %%
 	
-[0-9]+ {number = atoi(yytext); yylval = makeLeafNodeNum(NUM, number, inttype); return NUM;}
-[a-z]	{varname = *yytext; yylval = makeLeafNodeVar(ID, varname, inttype);	return ID;}
+[0-9]+ {number = atoi(yytext); yylval = makeLeafNodeNum(NUM, number); return NUM;}
+
 "+" {return PLUS;}
 "-" {return MINUS;}
 "*" {return MUL;}
@@ -25,7 +26,7 @@
 "<"	{return LESSTHAN;}
 "!=" {return NOTEQUAL;}
 [ \t\n] {}
-[();] {return *yytext;}
+[();,] {return *yytext;}
 "begin" {return BEG;}
 "end"	{return END;}
 "read" {return READ;}
@@ -46,6 +47,15 @@
 "repeat"	{return REPEAT;}
 "until"		{return UNTIL;}
 
+"decl"		{return DECL;}
+"enddecl"	{return ENDDECL;}
+"int"		{return INT;}
+"str"		{return STR;}
+
+[a-z]+	{varname = (char*) malloc(yyleng+1);
+		strncpy(varname, yytext, yyleng);
+		yylval = makeLeafNodeVar(ID, varname);	
+		return ID;}
 
 . {yyerror("unknown character\n");exit(1);}
 	

@@ -1,15 +1,16 @@
 #ifndef SYNTAXTREE_H
 #define SYNTAXTREE_H
 
-#define inttype 1
-#define booltype 0
-#define typeless -1
+#define INTTYPE 1
+#define BOOLTYPE 0
+#define STRTYPE 2
+#define NOTYPE -1
 
 typedef struct tnode
 {
 	int val;
 	int type;
-	char varname;
+	char* varname;
 	int nodetype;
 	struct tnode *left, *right, *elseptr;
 }tnode;
@@ -17,13 +18,13 @@ typedef struct tnode
 
 
 /*Make a leaf tnode and set the value of val field*/
-struct tnode* createTree(int val, int type, char c, int nodetype, struct tnode* l, struct tnode* r, struct tnode* elseptr );
+struct tnode* createTree(int val, int type, char* c, int nodetype, struct tnode* l, struct tnode* r, struct tnode* elseptr );
 	
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r);
 
-struct tnode* makeLeafNodeVar(int nodetype, char ch, int type);
+struct tnode* makeLeafNodeVar(int nodetype, char* ch);
 
-struct tnode* makeLeafNodeNum(int nodetype, int n, int type);
+struct tnode* makeLeafNodeNum(int nodetype, int n);
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r);
 
@@ -33,6 +34,27 @@ struct tnode* makeReadNode(int nodetype, struct tnode* lr);
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr);
 
+struct tnode* makeIfThenElseNode(int nodetype,struct tnode* l, struct tnode* r, struct tnode* elseptr);
+
+struct tnode* makeIfThenNode(int nodetype, struct tnode* l, struct tnode* r);
+
+struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r);
+
+tnode* makeRepeatNode(int nodetype, tnode* l, tnode* r);	//repeat-until. left is slist, right is expr
+
+tnode* makeBreakNode(int nodetype);
+
+tnode* makeContinueNode(int nodetype);
+
+void inorderForm(struct tnode* t);
+
+
+
+
+
+void checkType(int expectedOperand1Type, int expectedOperand2Type, int expectedOperand3Type, int operand1type, int operand2type, int operand3type);
+
+void checkTypeIfElse(int guardType, int thenType, int elseType );
 
 
 
