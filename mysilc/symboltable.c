@@ -1,4 +1,5 @@
 #include "symboltable.h"
+#include "syntaxtree.h"
 #include "y.tab.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,8 +17,18 @@ void printSymbolTable()
     while(temp!=NULL)
     {
         puts(temp->name);
-
-        printf("%d  %d  %d\n", temp->type, temp->size, temp->binding);
+        switch(temp->type)
+        {
+            case INTTYPE:
+                printf("INT ");
+                break;
+            case STRTYPE:
+                printf("STR ");
+                break;
+            default: 
+                printf("Unknown type: ERR");
+        }
+        printf("%d  %d\n", temp->size, temp->binding);
 
         temp=temp->next;
     }
@@ -29,9 +40,13 @@ Gsymbol* lookup(char* name)
     while(temp!=NULL)
     {
         if(strcmp(temp->name, name)==0)
+            {        
             return temp;
+            }
         temp=temp->next;
     }
+  //  printf("ERROR : UNDECLARED VARIABLE %s", name);
+  //  exit(1);
     return NULL;
 }
 

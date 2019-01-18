@@ -26,7 +26,7 @@
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
-	%token DECL ENDDECL INT STR
+	%token DECL ENDDECL INT STR STRCONST
 
 
 	%left EQUAL NOTEQUAL
@@ -37,13 +37,13 @@
 	
 	
 	
-	start : declarations program
+	start : declarations program	
 		   ;
 
 	declarations : DECL declist ENDDECL		{printf("declaration list\n");
 											printSymbolTable();	
 											}
-				|	DECL ENDDECL			{printf("No decl list\n");}
+				|	DECL ENDDECL			{printf("No decl list\n") ; }
 				;
 
 	declist : declist declr					{}			
@@ -71,8 +71,14 @@
 	{		
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
+
+		printf("\n\nCalling codegen \n");
+		FILE *fptr = fopen("targetfile.xsm","w");
+		codeGenXsm($2, fptr);
+		printf("Finished CodeGen\n");
+
 	}
-	|	BEG END {printf("No statements\n"); exit(1); }	
+	|	BEG END {printf("No statements\n");  }	
 	;
 
 
@@ -152,7 +158,6 @@
 	| '(' expr ')' 
 			{
 				$$ = $2;
-				//$$->type = $2->type;
 			}	
 	| NUM {$$ = $1; }
 	| ID 
@@ -160,6 +165,9 @@
 			$$ = $1;
 		
 		}
+
+	| STRCONST {$$ = $1;}	
+
 	| expr GREATERTHAN expr
 		{
 			$$ = makeOperatorNode(GREATERTHAN, BOOLTYPE, $1, $3);

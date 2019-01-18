@@ -65,13 +65,23 @@ void freeReg()
 	freeRegister--;
 }	
 
-
+void endIfUndeclared(char* ch, Gsymbol* temp)
+{
+	if(temp == NULL)
+	{
+		printf("ERROR: Undeclared Variable %s ", ch);
+		exit(1);
+	}
+}
 
 //returns stackPos for variable
-int getVarPos(char ch)
+int getVarPos(char* ch)
 {
-	int index=ch-'a';
-	return 4096+index;
+	Gsymbol* temp = lookup(ch);
+	
+	endIfUndeclared(ch, temp);
+
+	return temp->binding;
 }
 
 int getLabel()
@@ -113,15 +123,22 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == ID)
 	{
 		
-		int varPos = getVarPos(t->varname);	//returns 4096+0 for a and so on
+		int varPos = getVarPos(t->varname);	//returns binding of ID from symbol table
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, [%d]\n", reg0, varPos);
+		return reg0;
+	}
+
+	else if(t->nodetype == STRCONST)
+	{
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"%s\"\n", reg0, t->varname);		
 		return reg0;
 	}
 	
 	else if(t->nodetype == READ)
 	{
-		char varname = t->right->varname;
+		char* varname = t->right->varname;
 		int varPos = getVarPos(varname);
 		
 		pushAllRegisters(target_file);
@@ -179,7 +196,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 	}
 	else if(t->nodetype == ASSGN)
 	{
-		char varname = t->left->varname;
+		char* varname = t->left->varname;
 		int varPos = getVarPos(varname);
 		int reg1 = codeGen(t->right, target_file);
 		fprintf(target_file, "MOV [%d], R%d\n ", varPos, reg1);

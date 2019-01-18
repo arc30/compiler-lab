@@ -7,6 +7,7 @@
 
 	int number;
 	char* varname;
+	char* constname;
 	
 %}
 	
@@ -51,6 +52,13 @@
 "enddecl"	{return ENDDECL;}
 "int"		{return INT;}
 "str"		{return STR;}
+
+["][^"]*["]	{
+			constname = (char*) malloc(yyleng+1);
+			strncpy(constname, yytext+1, yyleng-2);
+			yylval = makeLeafNodeStringConst(STRCONST, constname);
+	
+			return STRCONST;}
 
 [a-z]+	{varname = (char*) malloc(yyleng+1);
 		strncpy(varname, yytext, yyleng);
