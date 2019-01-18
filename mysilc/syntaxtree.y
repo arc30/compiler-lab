@@ -63,6 +63,12 @@
 			| ID						{
 										 install($1->varname, currType, 1);
 										}
+			| varlist ',' ID '[' NUM ']' {
+										 install($3->varname, currType, $5->val);
+										 }
+			| ID '[' NUM ']'			{
+										 install($1->varname, currType, $3->val);
+										}
 			;
 
 	
