@@ -27,7 +27,9 @@
 "<"	{return LESSTHAN;}
 "!=" {return NOTEQUAL;}
 [ \t\n] {}
-[();,[]] {return *yytext;}
+"["	{return *yytext;}
+"]"	{return *yytext;}
+[();,] {return *yytext;}
 "begin" {return BEG;}
 "end"	{return END;}
 "read" {return READ;}

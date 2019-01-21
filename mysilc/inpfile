@@ -1,5 +1,6 @@
 decl
 int num, sum;
+int arr[10];
 str mesg;
 enddecl
 
