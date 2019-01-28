@@ -29,13 +29,7 @@ struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEnt
 	temp->elseptr = elseptr;
 }
 
-int getType(tnode* t)
-{
-	//if an identifier, get type from symbol table
-	//else get type from tnode structure
 
-
-}
 
 int checkType(int expectedOperand1Type, int expectedOperand2Type, int operand1type, int operand2type)
 {
@@ -72,13 +66,18 @@ struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
 	//TODO TYPECHECK READ
 	//if(! checkType(-1,INTTYPE, -1,lr->type) )
+	if(!checkType(-1, INTTYPE, NOTYPE, lr->type) && !checkType(-1, STRTYPE, NOTYPE, lr->type))
+		{
+			printf("Type Error: Read Node \n"); exit(1);
+		}
+	
 	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,lr,NULL);
 }
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
 		//TODO 
-		//HOW TO CHECK TYPE? BOOL EXPR AND INT EXPR ACCEPTED 
+		//HOW TO CHECK TYPE? CANT be done at static time no!!
 		return createTree(-1,-1,NULL,nodetype,NULL,NULL,lr,NULL);
 }
 
@@ -112,11 +111,48 @@ struct tnode* makeLeafNodeStringConst(int nodetype,char* ch)
 	return createTree(-1, STRTYPE, ch, nodetype,NULL, NULL, NULL, NULL);
 }
 
+tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
+{
+	char *name = l->varname;
+	Gsymbol* temp = lookup(name);
+	
+	int type = NOTYPE;
+
+	if(temp!=NULL)
+	{
+		type = temp->type;
+		
+		//typecheck id[expr], expr should be of int
+		if(!checkType(INTTYPE, NOTYPE, r->type, NOTYPE))
+		{
+			printf("Type Error: Array Node : expr should evaluate to int\n"); exit(1);
+		}
+
+		
+	}
+	return createTree(-1,type,name,nodetype,temp,l,r,NULL);
+}
+
+
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
-	if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type)) 
+
+
+	if(l->nodetype == ID || l->nodetype == ARR)
 	{
-		printf("Type Error: Assignment Node\n"); exit(1);
+		if(l->type==NOTYPE)
+		{
+			printf("Undeclared variable %s\n", l->varname); exit(1);
+		}
+		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type)) 
+		{
+			printf("Type Error: Assignment Node:"); exit(1);
+		}
+	}
+
+	else
+	{
+		printf("ERROR in ASSIGN Node. lvalue other than arr and id"); exit(1);
 	}
 
 	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r,NULL);
@@ -244,8 +280,10 @@ void printValue(struct tnode *t)
 			break;
 		case STRCONST:
 			printf("%s ", t->varname);
-			break;			
-
+			break;		
+		case ARR:
+			printf("[] ");	
+			break;
 
 		default:
 			printf("unknown nodetype, %d ",t->nodetype);

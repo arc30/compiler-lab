@@ -27,6 +27,7 @@
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
 	%token DECL ENDDECL INT STR STRCONST
+	%token ARR
 
 
 	%left EQUAL NOTEQUAL
@@ -77,18 +78,18 @@
 	{		
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
-
+	
 		printf("\n\nCalling codegen \n");
 		FILE *fptr = fopen("targetfile.xsm","w");
 		codeGenXsm($2, fptr);
 		printf("Finished CodeGen\n");
-
+	
 	}
 	|	BEG END {printf("No statements\n");  }	
 	;
 
 
-	
+
 
 
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }
@@ -106,10 +107,15 @@
 	;
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
+			  | READ '(' ID '[' expr ']' ')' ';' { $$ = makeReadNode(READ, makeArrayNode(ARR,$3,$5)); }
 
 	outputstmt : WRITE '(' expr ')' ';' {$$ = makeWriteNode(WRITE, $3);}
 		
 	assgnstmt : ID ASSGN expr ';' { $$ = makeAssignmentNode(ASSGN,'=',$1,$3); }
+			  | ID '[' expr ']' ASSGN expr ';'	
+			  	{ $$ = makeAssignmentNode(ASSGN,'=', makeArrayNode(ARR,$1,$3), $6);	}
+			  ;	
+
 	
 	ifstmt : IF '(' expr ')' THEN slist ELSE slist ENDIF ';'
 				{
@@ -171,6 +177,11 @@
 			$$ = $1;
 		
 		}
+	| ID '[' expr ']'	
+		{
+			$$ = makeArrayNode(ARR, $1,$3);
+		}
+
 
 	| STRCONST {$$ = $1;}	
 

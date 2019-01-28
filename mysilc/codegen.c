@@ -109,6 +109,24 @@ void popAllRegisters(FILE* target_file)
 
 }
 
+void codeGenBoundCheck(FILE* target_file, int indexReg, int size)
+{
+		int reg2 = getReg();
+		int label_1 = getLabel();
+		
+		fprintf(target_file, "MOV R%d, R%d\n", reg2, indexReg); 
+
+		fprintf(target_file, "LE R%d, R%d\n", reg2, size); 
+		fprintf(target_file, "JNZ R%d, L%d\n", reg2, label_1); //out of if's body
+		fprintf(target_file, "MOV R0, \"Exit\" \n");
+ 	  	fprintf(target_file, "PUSH R0 \n");
+   		fprintf(target_file, "CALL 0 \n");
+ 
+		freeReg();
+		fprintf(target_file, "L%d:\n", label_1);
+
+}
+
 int codeGen(struct tnode* t, FILE* target_file)
 {
 	//if leaf node ie number
@@ -129,6 +147,25 @@ int codeGen(struct tnode* t, FILE* target_file)
 		return reg0;
 	}
 
+	else if(t->nodetype == ARR)
+	{
+		int reg0 = getReg();
+		int reg1 = codeGen(t->right, target_file);
+		int varPos = getVarPos(t->varname); //base address
+
+		fprintf(target_file, "MOV R%d, %d\n", reg0, varPos);
+		fprintf(target_file, "ADD R%d, R%d\n", reg1, reg0);	//reg1 has address
+
+// TODO BOUNDCHECK
+//		codeGenBoundCheck(target_file,reg1, t->gEntry->size);		
+
+		fprintf(target_file, "MOV R%d, [R%d]\n", reg0, reg1);
+
+		freeReg();
+		return reg0;
+
+	}
+
 	else if(t->nodetype == STRCONST)
 	{
 		int reg0 = getReg();
@@ -138,8 +175,17 @@ int codeGen(struct tnode* t, FILE* target_file)
 	
 	else if(t->nodetype == READ)
 	{
+
 		char* varname = t->right->varname;
-		int varPos = getVarPos(varname);
+		int varPos = getVarPos(varname);	//base addr of variable
+		int regPos; //baaaad practice?
+
+		if(t->right->nodetype == ARR)
+		{
+			regPos = codeGen(t->right->right, target_file);	//codegen for expr 
+			fprintf(target_file, "ADD R%d, %d \n",regPos, varPos);
+	
+		}
 		
 		pushAllRegisters(target_file);
 		
@@ -148,8 +194,17 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "PUSH R%d \n", reg0);  	
 		fprintf(target_file, "MOV R%d, -1 \n", reg0);
 		fprintf(target_file, "PUSH R%d \n", reg0);
-		fprintf(target_file, "MOV R%d, %d \n",reg0, varPos);
-		fprintf(target_file, "PUSH R%d \n", reg0);
+		
+		if(t->right->nodetype == ID)
+		{
+			fprintf(target_file, "MOV R%d, %d \n",reg0, varPos);
+			fprintf(target_file, "PUSH R%d \n", reg0);
+		}
+		if(t->right->nodetype == ARR)
+		{
+			fprintf(target_file, "PUSH R%d \n", regPos);
+		}
+
 		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "CALL 0 \n");
@@ -162,6 +217,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 		popAllRegisters(target_file);
 
 		freeReg();
+		
+		if(t->right->nodetype == ARR)
+			freeReg();
+		
 		return -1;
 		
 	}
@@ -199,7 +258,19 @@ int codeGen(struct tnode* t, FILE* target_file)
 		char* varname = t->left->varname;
 		int varPos = getVarPos(varname);
 		int reg1 = codeGen(t->right, target_file);
-		fprintf(target_file, "MOV [%d], R%d\n ", varPos, reg1);
+		if(t->left->nodetype == ID)
+		{
+			fprintf(target_file, "MOV [%d], R%d\n ", varPos, reg1);
+		}
+
+		else if(t->left->nodetype == ARR)
+		{
+			//int regPos = getArrPos(t->left); TODO
+			int regPos = codeGen(t->left->right, target_file);
+			fprintf(target_file, "ADD R%d, %d \n",regPos, varPos);
+			fprintf(target_file, "MOV [R%d], R%d\n ", regPos, reg1);
+			freeReg();
+		}
 		freeReg();
 		return -1;
 	}
@@ -386,6 +457,8 @@ void codeGenXsm(struct tnode* t, FILE* target_file)
 
 
 	printf("Generated Prog Code %d\n", result);
+
+
 
 	fprintf(target_file, "MOV R0, \"Exit\" \n");
    	fprintf(target_file, "PUSH R0 \n");

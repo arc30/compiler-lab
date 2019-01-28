@@ -62,12 +62,12 @@
 	
 			return STRCONST;}
 
-[a-z]+	{varname = (char*) malloc(yyleng+1);
+[_a-z][a-z_0-9]*	{varname = (char*) malloc(yyleng+1);
 		strncpy(varname, yytext, yyleng);
 		yylval = makeLeafNodeVar(ID, varname);	
 		return ID;}
 
-. {yyerror("unknown character\n");exit(1);}
+. {printf("%s",yytext);yyerror("unknown character\n"); exit(1);}
 	
 %%
 	
