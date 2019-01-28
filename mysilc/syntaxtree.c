@@ -239,6 +239,9 @@ void printValue(struct tnode *t)
 		case DIV:
 			printf("/ ");
 			break;
+		case MOD:
+			printf("% ");
+			break;
 		case ASSGN:
 			printf("= ");
 			break;

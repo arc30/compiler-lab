@@ -33,7 +33,7 @@
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
 	%left PLUS MINUS
-	%left MUL DIV
+	%left MUL DIV MOD
 %%
 	
 	
@@ -166,6 +166,10 @@
 	| expr DIV expr 
 			{
 				$$ = makeOperatorNode(DIV, INTTYPE,$1,$3);
+			}
+	| expr MOD expr
+			{
+				$$ = makeOperatorNode(MOD, INTTYPE, $1, $3);
 			}
 	| '(' expr ')' 
 			{

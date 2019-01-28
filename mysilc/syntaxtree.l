@@ -26,6 +26,7 @@
 ">"	{return GREATERTHAN;}
 "<"	{return LESSTHAN;}
 "!=" {return NOTEQUAL;}
+"%"  {return MOD;}
 [ \t\n] {}
 "["	{return *yytext;}
 "]"	{return *yytext;}

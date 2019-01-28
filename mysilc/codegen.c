@@ -400,6 +400,9 @@ int codeGen(struct tnode* t, FILE* target_file)
 			case DIV:	fprintf(target_file, "DIV R%d, R%d\n", reg1, reg2);
 						break;
 
+			case MOD:	fprintf(target_file, "MOD R%d, R%d\n", reg1, reg2);
+						break;
+
 			case GREATERTHAN_EQUAL:	
 						fprintf(target_file, "GE R%d, R%d\n", reg1, reg2);
 						break;
