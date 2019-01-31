@@ -28,7 +28,7 @@ void printSymbolTable()
             default: 
                 printf("Unknown type: ERR");
         }
-        printf("%d  %d\n", temp->size, temp->binding);
+        printf("%d  %d  %d\n", temp->size, temp->binding, temp->colSize);
 
         temp=temp->next;
     }
@@ -64,7 +64,7 @@ void endIfRedeclared(char* name)
     }
 }
 
-void install(char* name, int type, int size) // Creates a symbol table entry.
+void install(char* name, int type, int size, int colSize) // Creates a symbol table entry.
 {
     endIfRedeclared(name);    
 
@@ -81,6 +81,7 @@ void install(char* name, int type, int size) // Creates a symbol table entry.
     newEntry->type = type;
     newEntry->size = size; 
     newEntry->binding = BindingAddr;
+    newEntry->colSize = colSize;
 
     BindingAddr += size;
 

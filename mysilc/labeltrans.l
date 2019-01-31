@@ -4,10 +4,8 @@
 	#include <stdlib.h>
     #include <string.h>
 
-	//int number;
-	//char varname;
+
     static int lineNumber = 1;
-    char* file1;
     int pass = 1;
     FILE *fp_target;
 
@@ -17,7 +15,7 @@
         int addr;
         struct node* next;
     }node;
-    node* head = NULL;
+    node* labelHead = NULL;
 	
 %}
 
@@ -29,18 +27,17 @@ label "L"[0-9]+
             if(pass==1)
                 lineNumber++;
             else if(pass == 2)
-                fprintf(fp_target, "%c", *yytext);    
+                fprintf(fp_target, "%c", *lttext);    
                 
         }
 
 {label}":"[\n]  {   if(pass == 1)
                     { 
-                        char* string = malloc(yyleng);
-                        strncpy(string, yytext, yyleng-2);
+                        char* string = malloc(ltleng);
+                        strncpy(string, lttext, ltleng-2);
                         printf("a label decl found at %d  \n", lineNumber) ;
 
                         saveLabelAddr(string);
-                       // lineNumber++;
 
                     }
                     else if (pass == 2)
@@ -52,7 +49,7 @@ label "L"[0-9]+
 {label}     {
                 if(pass == 2)
                 {
-                    fprintf(fp_target, "%d", getAddr(yytext));
+                    fprintf(fp_target, "%d", getAddr(lttext));
                 }
             }
 
@@ -63,7 +60,7 @@ label "L"[0-9]+
             }
         else if(pass == 2)
             {
-            fprintf(fp_target, "%c", *yytext); 
+            fprintf(fp_target, "%c", *lttext); 
             }
             
     }	
@@ -71,7 +68,7 @@ label "L"[0-9]+
 
 int getAddr(char* s)
 {
-    node* p = head;
+    node* p = labelHead;
     while(p)
     {
         if( strcmp(p->name, s) == 0)    //strings match
@@ -87,31 +84,29 @@ int getAddr(char* s)
 	
 void saveLabelAddr(char* s)
 {
-    //puts(s);
     
     node* temp = (node*)malloc(sizeof(node));
     strcpy(temp->name, s);
     temp->addr = 2056 + 2*(lineNumber - 9);
-   // lineNumber--;
     temp->next = NULL;
 
-    if(!head)
+    if(!labelHead)
     {
-        head = temp;
+        labelHead = temp;
     }
     else
     {
-        temp->next = head;
-        head = temp;
+        temp->next = labelHead;
+        labelHead = temp;
     }
 }    
-int yywrap(void) 
+int ltwrap(void) 
 {
     if(pass == 1)
     {
         fp_target = fopen("targetfile_final.xsm", "w");
         pass++;
-        fseek(yyin, 0, SEEK_SET);
+        fseek(ltin, 0, SEEK_SET);
         return 0;
     }
     else
@@ -122,16 +117,4 @@ int yywrap(void)
 }
 	
    
-int main()
-{
-    file1="targetfile.xsm";
-  	yyin = fopen("targetfile.xsm","r");
-  	yylex();
-    node* p = head;
-    while(p!=NULL)
-    {  
-        printf("label %s addr %d", p->name, p->addr);
-        p = p->next;
-    }
-    return 1;
-}
+

@@ -14,7 +14,7 @@ typedef struct tnode
 	char* varname;
 	int nodetype;
 	Gsymbol* gEntry;
-	struct tnode *left, *right, *elseptr;
+	struct tnode *left, *right, *extraRight;
 }tnode;
 
 

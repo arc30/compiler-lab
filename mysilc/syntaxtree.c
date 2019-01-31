@@ -26,7 +26,7 @@ struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEnt
 	temp->nodetype = nodetype;
 	temp->left=l;
 	temp->right=r;
-	temp->elseptr = elseptr;
+	temp->extraRight = elseptr;
 }
 
 
@@ -127,10 +127,30 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 		{
 			printf("Type Error: Array Node : expr should evaluate to int\n"); exit(1);
 		}
-
 		
 	}
 	return createTree(-1,type,name,nodetype,temp,l,r,NULL);
+}
+
+tnode* make2DArrayNode(int nodetype, tnode* l, tnode* r1, tnode* r2)
+{
+	char *name = l->varname;
+	Gsymbol* temp = lookup(name);
+	
+	int type = NOTYPE;
+
+	if(temp!=NULL)
+	{
+		type = temp->type;
+		
+		//typecheck id[expr] [expr], both expr should be of int
+		if(!checkType(INTTYPE, INTTYPE, r1->type, r2->type))
+		{
+			printf("Type Error: 2DArray Node : expr should evaluate to int\n"); exit(1);
+		}
+		
+	}
+	return createTree(-1,type,name,nodetype,temp,l,r1,r2);
 }
 
 
@@ -138,7 +158,7 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 {
 
 
-	if(l->nodetype == ID || l->nodetype == ARR)
+	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == ARR2D)
 	{
 		if(l->type==NOTYPE)
 		{
@@ -287,6 +307,9 @@ void printValue(struct tnode *t)
 		case ARR:
 			printf("[] ");	
 			break;
+		case ARR2D:
+			printf("[][] ");
+			break;
 
 		default:
 			printf("unknown nodetype, %d ",t->nodetype);
@@ -305,7 +328,7 @@ void inorderForm(struct tnode* t)
 		inorderForm(t->left);
 		printValue(t);	
 		inorderForm(t->right);
-		inorderForm(t->elseptr);
+		inorderForm(t->extraRight);
 		
 	}	
 		

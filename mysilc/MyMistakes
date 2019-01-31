@@ -1,0 +1,2 @@
+1) Corrected popAllRegisters during stage4-arr2d
+2) Major bug in pushAll and popAll. inconsistency in freeRegister

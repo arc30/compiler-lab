@@ -102,7 +102,7 @@ void pushAllRegisters(FILE* target_file)
 void popAllRegisters(FILE* target_file)
 {
 	int i;
-	for(i=0; i<freeRegister; i++)
+	for(i=freeRegister-1; i>=0; i--)
 	{
 		fprintf(target_file, "POP R%d \n",i);
 	}
@@ -166,6 +166,27 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 	}
 
+	else if(t->nodetype == ARR2D)
+	{
+		int reg0 = getReg();
+		int reg1 = codeGen(t->right, target_file);
+		int reg2 = codeGen(t->extraRight, target_file);
+		int varPos = getVarPos(t->varname);
+
+		fprintf(target_file, "MOV R%d, %d\n", reg0, t->gEntry->colSize );
+		fprintf(target_file, "MUL R%d, R%d\n", reg0, reg1);
+		fprintf(target_file, "ADD R%d, R%d\n", reg0, reg2);
+	
+		fprintf(target_file, "ADD R%d, %d \n",reg0, varPos);
+
+
+		fprintf(target_file, "MOV R%d, [R%d]\n", reg0, reg0);
+
+		freeReg();
+		freeReg();
+		return reg0;		
+	}
+
 	else if(t->nodetype == STRCONST)
 	{
 		int reg0 = getReg();
@@ -178,17 +199,8 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 		char* varname = t->right->varname;
 		int varPos = getVarPos(varname);	//base addr of variable
-		int regPos; //baaaad practice?
+		pushAllRegisters(target_file);		
 
-		if(t->right->nodetype == ARR)
-		{
-			regPos = codeGen(t->right->right, target_file);	//codegen for expr 
-			fprintf(target_file, "ADD R%d, %d \n",regPos, varPos);
-	
-		}
-		
-		pushAllRegisters(target_file);
-		
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, \"Read\"\n", reg0);		
 		fprintf(target_file, "PUSH R%d \n", reg0);  	
@@ -200,27 +212,42 @@ int codeGen(struct tnode* t, FILE* target_file)
 			fprintf(target_file, "MOV R%d, %d \n",reg0, varPos);
 			fprintf(target_file, "PUSH R%d \n", reg0);
 		}
-		if(t->right->nodetype == ARR)
+		else if(t->right->nodetype == ARR)
 		{
+			int regPos = codeGen(t->right->right, target_file);	//codegen for expr 
+			fprintf(target_file, "ADD R%d, %d \n",regPos, varPos);
+
 			fprintf(target_file, "PUSH R%d \n", regPos);
+			freeReg();
+		}
+		else if(t->right->nodetype == ARR2D)
+		{
+			int reg2d_1 = codeGen(t->right->right, target_file);
+			int reg2d_2 = codeGen(t->right->extraRight, target_file);
+			fprintf(target_file, "MUL R%d, %d \n",reg2d_1, t->right->gEntry->colSize);
+			fprintf(target_file, "ADD R%d, R%d \n",reg2d_1, reg2d_2);
+			fprintf(target_file, "ADD R%d, %d \n",reg2d_1, varPos);
+
+			fprintf(target_file, "PUSH R%d \n", reg2d_1);
+
+			freeReg(); freeReg();
 		}
 
 		fprintf(target_file, "PUSH R%d \n", reg0);
 		fprintf(target_file, "PUSH R%d \n", reg0);
+		
 		fprintf(target_file, "CALL 0 \n");
-		fprintf(target_file, "POP R%d \n", reg0);
-		fprintf(target_file, "POP R%d \n", reg0);
-		fprintf(target_file, "POP R%d \n", reg0);
-		fprintf(target_file, "POP R%d \n", reg0);
-		fprintf(target_file, "POP R%d \n", reg0);
-		
-		popAllRegisters(target_file);
 
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		
 		freeReg();
+		popAllRegisters(target_file);
 		
-		if(t->right->nodetype == ARR)
-			freeReg();
-		
+
 		return -1;
 		
 	}
@@ -228,9 +255,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == WRITE)
 	{
 
+		pushAllRegisters(target_file);
+
 		int reg1 = codeGen(t->right, target_file);
 
-		pushAllRegisters(target_file);
 
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, \"Write\"\n", reg0);		
@@ -247,10 +275,11 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "POP R%d \n", reg0);
 		fprintf(target_file, "POP R%d \n", reg0);
 
-		popAllRegisters(target_file);
 
 		freeReg();
 		freeReg();
+
+		popAllRegisters(target_file);
 		return -1;
 	}
 	else if(t->nodetype == ASSGN)
@@ -270,6 +299,20 @@ int codeGen(struct tnode* t, FILE* target_file)
 			fprintf(target_file, "ADD R%d, %d \n",regPos, varPos);
 			fprintf(target_file, "MOV [R%d], R%d\n ", regPos, reg1);
 			freeReg();
+		}
+
+		else if(t->left->nodetype == ARR2D)
+		{
+			int reg2d_1 = codeGen(t->left->right, target_file);
+			int reg2d_2 = codeGen(t->left->extraRight, target_file);
+			fprintf(target_file, "MUL R%d, %d \n",reg2d_1, t->left->gEntry->colSize);
+			fprintf(target_file, "ADD R%d, R%d \n",reg2d_1, reg2d_2);
+			fprintf(target_file, "ADD R%d, %d \n",reg2d_1, varPos);
+
+			fprintf(target_file, "MOV [R%d], R%d\n ", reg2d_1, reg1);
+			freeReg();
+			freeReg();
+			
 		}
 		freeReg();
 		return -1;
@@ -309,7 +352,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "JMP L%d\n", label_2);
 
 		fprintf(target_file, "L%d:\n", label_1);	//else body starts
-		codeGen(t->elseptr, target_file);
+		codeGen(t->extraRight, target_file);
 
 		fprintf(target_file, "L%d:\n", label_2);	//end of else
 

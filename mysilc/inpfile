@@ -1,23 +1,65 @@
 decl
-    int n,i,j,sum,k;
+int arr1[2][2];
+int arr2[2][2];
+int res[2][2];
+int i,j,k;
 enddecl
+
 begin
-	read(n);
-	sum=0;
-	k=1;
-	while(k<=n)do
-		if(n<=1) then
-			sum=sum+1;
-		else
-			i=1;
-			j=1;
-			while(i<=k)do
-				j=j*i;
-				i=i+1;
-			endwhile;
-			sum=sum+j;
-		endif;
-		k=k+1;
+
+write("arr1:");
+i=0;
+while (i<2) do
+	j=0;
+	while (j<2) do
+		read(arr1[i][j]);
+		j=j+1;
 	endwhile;
-	write(sum);
+	i=i+1;
+endwhile;
+
+write("arr2:");
+i=0;
+while (i<2) do
+	j=0;
+	while (j<2) do
+		read(arr2[i][j]);
+		j=j+1;
+	endwhile;
+	i=i+1;
+endwhile;
+
+write("Mult");
+i=0;
+while(i<2) do
+	j=0;
+	while(j<2) do
+		res[i][j]=0;
+		k=0;
+		while(k<2) do
+			res[i][j] = res[i][j] + arr1[i][k]*arr2[k][j];
+			k=k+1;
+		endwhile;
+		j=j+1;
+	endwhile;
+	i=i+1;
+endwhile;
+
+
+write("res:");
+i=0;
+while (i<2) do
+	j=0;
+	while (j<2) do
+		write(res[i][j]);
+		
+		j=j+1;
+	endwhile;
+	i=i+1;
+endwhile;
+
+
+
+
+
 end

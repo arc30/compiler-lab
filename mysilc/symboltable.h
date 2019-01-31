@@ -7,6 +7,7 @@ typedef struct Gsymbol
 	char *name;		// name of the variable
 	int type;		// type of the variable
 	int size;		// size of the type of the variable
+	int colSize;	//column size required for 2d array
 	int binding;	// stores the static memory address allocated to the variable
 	struct Gsymbol *next;
 }Gsymbol; 
@@ -15,7 +16,7 @@ typedef struct Gsymbol
 
 Gsymbol* lookup(char* name); // Returns a pointer to the symbol table entry for the variable, returns NULL otherwise.
 
-void install(char* name, int type, int size); // Creates a symbol table entry.
+void install(char* name, int type, int size, int colSize); // Creates a symbol table entry.
 
 
 

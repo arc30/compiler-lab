@@ -16,6 +16,7 @@
 	extern int yylex();
 	extern int yyparse();
 	extern FILE *yyin;
+	extern FILE *ltin;
 
 	int currType = NOTYPE;
 	
@@ -27,7 +28,7 @@
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
 	%token DECL ENDDECL INT STR STRCONST
-	%token ARR
+	%token ARR ARR2D
 
 
 	%left EQUAL NOTEQUAL
@@ -59,31 +60,47 @@
 			;
 
 	varlist	: varlist ',' ID			{
-										 install($3->varname, currType, 1); 
+										 install($3->varname, currType, 1, 0); 
 										}
 			| ID						{
-										 install($1->varname, currType, 1);
+										 install($1->varname, currType, 1, 0);
 										}
 			| varlist ',' ID '[' NUM ']' {
-										 install($3->varname, currType, $5->val);
+										 install($3->varname, currType, $5->val, 0);
 										 }
 			| ID '[' NUM ']'			{
-										 install($1->varname, currType, $3->val);
+										 install($1->varname, currType, $3->val, 0);
 										}
+			| ID '[' NUM ']' '[' NUM ']'{
+										install($1->varname, currType, ($3->val)*($6->val), $6->val);
+										}
+
 			;
 
 	
 
 	program : BEG slist END 
 	{		
+
+		char* file1="targetfile.xsm";
+
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
 	
 		printf("\n\nCalling codegen \n");
-		FILE *fptr = fopen("targetfile.xsm","w");
+		FILE *fptr = fopen(file1,"w");
 		codeGenXsm($2, fptr);
 		printf("Finished CodeGen\n");
-	
+
+		fclose(fptr); //IMP
+
+		ltin = fopen(file1,"r");
+		ltlex();
+
+		fclose(ltin);
+		return 1;
+
+
 	}
 	|	BEG END {printf("No statements\n");  }	
 	;
@@ -108,12 +125,15 @@
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
 			  | READ '(' ID '[' expr ']' ')' ';' { $$ = makeReadNode(READ, makeArrayNode(ARR,$3,$5)); }
+			  | READ '(' ID '[' expr ']' '[' expr ']' ')' ';' { $$ = makeReadNode(READ, make2DArrayNode(ARR2D,$3,$5, $8)); }
 
 	outputstmt : WRITE '(' expr ')' ';' {$$ = makeWriteNode(WRITE, $3);}
 		
 	assgnstmt : ID ASSGN expr ';' { $$ = makeAssignmentNode(ASSGN,'=',$1,$3); }
 			  | ID '[' expr ']' ASSGN expr ';'	
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', makeArrayNode(ARR,$1,$3), $6);	}
+			  | ID '[' expr ']' '[' expr ']' ASSGN expr ';'
+			  	{ $$ = makeAssignmentNode(ASSGN,'=', make2DArrayNode(ARR2D,$1,$3, $6), $9); }
 			  ;	
 
 	
@@ -184,6 +204,10 @@
 	| ID '[' expr ']'	
 		{
 			$$ = makeArrayNode(ARR, $1,$3);
+		}
+	| ID '[' expr ']' '[' expr ']'
+		{
+			$$ = make2DArrayNode(ARR2D, $1, $3, $6);
 		}
 
 

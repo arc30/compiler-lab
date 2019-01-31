@@ -490,10 +490,8 @@ char *lttext;
 	#include <stdlib.h>
     #include <string.h>
 
-	//int number;
-	//char varname;
+
     static int lineNumber = 1;
-    char* file1;
     int pass = 1;
     FILE *fp_target;
 
@@ -503,9 +501,9 @@ char *lttext;
         int addr;
         struct node* next;
     }node;
-    node* head = NULL;
+    node* labelHead = NULL;
 	
-#line 509 "lex.lt.c"
+#line 507 "lex.lt.c"
 
 #define INITIAL 0
 
@@ -723,10 +721,10 @@ YY_DECL
 		}
 
 	{
-#line 26 "labeltrans.l"
+#line 24 "labeltrans.l"
 
 
-#line 730 "lex.lt.c"
+#line 728 "lex.lt.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -786,7 +784,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 28 "labeltrans.l"
+#line 26 "labeltrans.l"
 {
             if(pass==1)
                 lineNumber++;
@@ -798,7 +796,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 36 "labeltrans.l"
+#line 34 "labeltrans.l"
 {   if(pass == 1)
                     { 
                         char* string = malloc(ltleng);
@@ -806,7 +804,6 @@ YY_RULE_SETUP
                         printf("a label decl found at %d  \n", lineNumber) ;
 
                         saveLabelAddr(string);
-                       // lineNumber++;
 
                     }
                     else if (pass == 2)
@@ -817,7 +814,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 52 "labeltrans.l"
+#line 49 "labeltrans.l"
 {
                 if(pass == 2)
                 {
@@ -827,7 +824,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 60 "labeltrans.l"
+#line 57 "labeltrans.l"
 {   if(pass == 1)
             {
                 ;
@@ -841,10 +838,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 70 "labeltrans.l"
+#line 67 "labeltrans.l"
 ECHO;
 	YY_BREAK
-#line 848 "lex.lt.c"
+#line 845 "lex.lt.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1845,13 +1842,13 @@ void ltfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 70 "labeltrans.l"
+#line 67 "labeltrans.l"
 
 
 
 int getAddr(char* s)
 {
-    node* p = head;
+    node* p = labelHead;
     while(p)
     {
         if( strcmp(p->name, s) == 0)    //strings match
@@ -1867,22 +1864,20 @@ int getAddr(char* s)
 	
 void saveLabelAddr(char* s)
 {
-    //puts(s);
     
     node* temp = (node*)malloc(sizeof(node));
     strcpy(temp->name, s);
     temp->addr = 2056 + 2*(lineNumber - 9);
-   // lineNumber--;
     temp->next = NULL;
 
-    if(!head)
+    if(!labelHead)
     {
-        head = temp;
+        labelHead = temp;
     }
     else
     {
-        temp->next = head;
-        head = temp;
+        temp->next = labelHead;
+        labelHead = temp;
     }
 }    
 int ltwrap(void) 
@@ -1902,17 +1897,5 @@ int ltwrap(void)
 }
 	
    
-int main()
-{
-    file1="targetfile.xsm";
-  	ltin = fopen("targetfile.xsm","r");
-  	ltlex();
-    node* p = head;
-    while(p!=NULL)
-    {  
-        printf("label %s addr %d", p->name, p->addr);
-        p = p->next;
-    }
-    return 1;
-}
+
 
