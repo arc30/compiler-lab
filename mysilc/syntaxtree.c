@@ -180,11 +180,43 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 	
 struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tnode *r)
 {
-	if(!checkType(INTTYPE, INTTYPE, l->type, r->type))
+	//For Unary Op
+	//left node is null
+	if(nodetype == DEREF)
 	{
-		printf("Type Error: Operator Node\n"); exit(1);
+		if(!checkType(NOTYPE, INTPTR, NOTYPE, r->type) || !checkType(NOTYPE, STRPTR, NOTYPE, r->type))
+		{
+			printf("Type Error: Dereference Node not of type ptr\n"); exit(1);
+		}
+		if(type == INTPTR)
+		{
+			type = INTTYPE;
+		}
+		else if (type == STRPTR)
+		{
+			type= STRTYPE;
+		}
+		return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
 	}
-	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
+
+	else if(nodetype == ADDROF)
+	{
+		if(!checkType(NOTYPE, INTTYPE, NOTYPE, r->type) || !checkType(NOTYPE, STRTYPE, NOTYPE, r->type))
+		{
+			printf("Type Error: AddrOf Node not of type int/str\n"); exit(1);
+		}
+
+		return createTree(-1,INTTYPE,NULL,nodetype,NULL,l,r,NULL);
+	}
+   else
+   {
+	//For Binary Op
+		if(!checkType(INTTYPE, INTTYPE, l->type, r->type))
+		{
+			printf("Type Error: Operator Node\n"); exit(1);
+		}
+		return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
+	}
 }
 
 struct tnode* makeIfThenElseNode(int nodetype,struct tnode* l, struct tnode* r, struct tnode* elseptr)
@@ -310,7 +342,12 @@ void printValue(struct tnode *t)
 		case ARR2D:
 			printf("[][] ");
 			break;
-
+		case DEREF:
+			printf("* ");
+			break;
+		case ADDROF:
+			printf("& ");
+			break;
 		default:
 			printf("unknown nodetype, %d ",t->nodetype);
 			exit(1);

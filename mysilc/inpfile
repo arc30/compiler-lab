@@ -1,62 +1,10 @@
 decl
-int arr1[2][2];
-int arr2[2][2];
-int res[2][2];
-int i,j,k;
+int *p;
+int q;
 enddecl
 
 begin
 
-write("arr1:");
-i=0;
-while (i<2) do
-	j=0;
-	while (j<2) do
-		read(arr1[i][j]);
-		j=j+1;
-	endwhile;
-	i=i+1;
-endwhile;
-
-write("arr2:");
-i=0;
-while (i<2) do
-	j=0;
-	while (j<2) do
-		read(arr2[i][j]);
-		j=j+1;
-	endwhile;
-	i=i+1;
-endwhile;
-
-write("Mult");
-i=0;
-while(i<2) do
-	j=0;
-	while(j<2) do
-		res[i][j]=0;
-		k=0;
-		while(k<2) do
-			res[i][j] = res[i][j] + arr1[i][k]*arr2[k][j];
-			k=k+1;
-		endwhile;
-		j=j+1;
-	endwhile;
-	i=i+1;
-endwhile;
-
-
-write("res:");
-i=0;
-while (i<2) do
-	j=0;
-	while (j<2) do
-		write(res[i][j]);
-		
-		j=j+1;
-	endwhile;
-	i=i+1;
-endwhile;
 
 
 

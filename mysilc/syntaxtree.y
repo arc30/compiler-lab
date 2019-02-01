@@ -28,13 +28,15 @@
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
 	%token DECL ENDDECL INT STR STRCONST
-	%token ARR ARR2D
+	%token ARR ARR2D DEREF 
 
+	%token INTPTR STRPTR
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
 	%left PLUS MINUS
 	%left MUL DIV MOD
+	%right ADDROF
 %%
 	
 	
@@ -59,20 +61,36 @@
 			| STR						{ currType = STRTYPE; }
 			;
 
-	varlist	: varlist ',' ID			{
-										 install($3->varname, currType, 1, 0); 
-										}
-			| ID						{
+	varlist : varlist ',' var				
+			| var
+			;
+
+
+	
+	var : 		ID						{
 										 install($1->varname, currType, 1, 0);
 										}
-			| varlist ',' ID '[' NUM ']' {
-										 install($3->varname, currType, $5->val, 0);
-										 }
 			| ID '[' NUM ']'			{
 										 install($1->varname, currType, $3->val, 0);
 										}
 			| ID '[' NUM ']' '[' NUM ']'{
 										install($1->varname, currType, ($3->val)*($6->val), $6->val);
+										}
+			| MUL ID					{	//same as *ID
+
+											if(currType == INTTYPE)
+											{
+												currType = INTPTR;
+											}
+											else if(currType == STRTYPE)
+											{
+												currType = STRPTR;
+											}
+											else
+											{
+												printf("%d Error *id", currType); exit(1);
+											}
+											install($2->varname, currType, 1, 0);
 										}
 
 			;
@@ -86,7 +104,7 @@
 
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
-	
+	/*
 		printf("\n\nCalling codegen \n");
 		FILE *fptr = fopen(file1,"w");
 		codeGenXsm($2, fptr);
@@ -98,6 +116,7 @@
 		ltlex();
 
 		fclose(ltin);
+	*/	
 		return 1;
 
 
@@ -190,6 +209,14 @@
 	| expr MOD expr
 			{
 				$$ = makeOperatorNode(MOD, INTTYPE, $1, $3);
+			}
+	| MUL ID
+			{
+				$$ = makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 );
+			}
+	| ADDROF ID
+			{
+				$$ = makeOperatorNode(ADDROF, $2->gEntry->type, NULL, $2);
 			}
 	| '(' expr ')' 
 			{

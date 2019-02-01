@@ -19,6 +19,7 @@
 "-" {return MINUS;}
 "*" {return MUL;}
 "/" {return DIV;}
+"&" {return ADDROF;}
 "=" {return ASSGN;}
 "==" {return EQUAL;}
 ">=" {return GREATERTHAN_EQUAL;}
@@ -55,6 +56,7 @@
 "enddecl"	{return ENDDECL;}
 "int"		{return INT;}
 "str"		{return STR;}
+
 
 ["][^"]*["]	{
 			constname = (char*) malloc(yyleng+1);
