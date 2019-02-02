@@ -80,17 +80,17 @@
 
 											if(currType == INTTYPE)
 											{
-												currType = INTPTR;
+												install($2->varname, INTPTR, 1, 0);
 											}
 											else if(currType == STRTYPE)
 											{
-												currType = STRPTR;
+												install($2->varname, STRPTR, 1, 0);
 											}
 											else
 											{
 												printf("%d Error *id", currType); exit(1);
 											}
-											install($2->varname, currType, 1, 0);
+											
 										}
 
 			;
@@ -104,7 +104,7 @@
 
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
-	/*
+	
 		printf("\n\nCalling codegen \n");
 		FILE *fptr = fopen(file1,"w");
 		codeGenXsm($2, fptr);
@@ -116,7 +116,7 @@
 		ltlex();
 
 		fclose(ltin);
-	*/	
+		
 		return 1;
 
 
@@ -149,10 +149,14 @@
 	outputstmt : WRITE '(' expr ')' ';' {$$ = makeWriteNode(WRITE, $3);}
 		
 	assgnstmt : ID ASSGN expr ';' { $$ = makeAssignmentNode(ASSGN,'=',$1,$3); }
+
 			  | ID '[' expr ']' ASSGN expr ';'	
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', makeArrayNode(ARR,$1,$3), $6);	}
+
 			  | ID '[' expr ']' '[' expr ']' ASSGN expr ';'
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', make2DArrayNode(ARR2D,$1,$3, $6), $9); }
+
+			  | MUL ID ASSGN expr ';'	{ $$ = makeAssignmentNode(ASSGN,'=', makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 ), $4 );	}
 			  ;	
 
 	
@@ -190,7 +194,17 @@
 				}
 			;
 
-	expr : expr PLUS expr 
+	expr : MUL ID
+			{
+				$$ = makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 );
+			}
+	| ADDROF ID
+			{
+				$$ = makeOperatorNode(ADDROF, $2->gEntry->type, NULL, $2);
+			}
+
+	
+	|expr PLUS expr 
 			{
 				$$ = makeOperatorNode(PLUS,INTTYPE,$1,$3);
 			}
@@ -209,14 +223,6 @@
 	| expr MOD expr
 			{
 				$$ = makeOperatorNode(MOD, INTTYPE, $1, $3);
-			}
-	| MUL ID
-			{
-				$$ = makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 );
-			}
-	| ADDROF ID
-			{
-				$$ = makeOperatorNode(ADDROF, $2->gEntry->type, NULL, $2);
 			}
 	| '(' expr ')' 
 			{

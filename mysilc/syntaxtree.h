@@ -7,8 +7,7 @@
 #define STRTYPE 2
  //TODO MAKE THESE TOKENS
 #define NOTYPE -1
-#define INTPTRTYPE 3
-#define STRPTRTYPE 4
+
 
 
 typedef struct tnode

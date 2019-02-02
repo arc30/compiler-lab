@@ -1,13 +1,14 @@
 decl
-int *p;
-int q;
+int *p, *s, q,r;
+str a,b,*c;
 enddecl
 
 begin
-
-
-
-
+p=&q;
+q=5;
+*p = 9+q;
+write(q);
+write(*p+1);
 
 
 end

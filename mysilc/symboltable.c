@@ -25,8 +25,14 @@ void printSymbolTable()
             case STRTYPE:
                 printf("STR ");
                 break;
+            case INTPTR:
+                printf("INTPTR ");
+                break;
+            case STRPTR:
+                printf("STRPTR ");
+                break;
             default: 
-                printf("Unknown type: ERR");
+                printf("Unknown type %d: ERR ",temp->type );
         }
         printf("%d  %d  %d\n", temp->size, temp->binding, temp->colSize);
 

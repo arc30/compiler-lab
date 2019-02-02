@@ -314,6 +314,15 @@ int codeGen(struct tnode* t, FILE* target_file)
 			freeReg();
 			
 		}
+		else if(t->left->nodetype == DEREF)
+		{
+			int reg2 = getReg();
+			fprintf(target_file, "MOV R%d, [%d] \n",reg2, varPos);
+			fprintf(target_file, "MOV [R%d], R%d \n", reg2, reg1 );
+			freeReg();
+		}
+
+	
 		freeReg();
 		return -1;
 	}
@@ -422,6 +431,22 @@ int codeGen(struct tnode* t, FILE* target_file)
 			fprintf(target_file, "JMP L%d\n", label_1);
 		}
 		return -1;
+	}
+	else if(t->nodetype == DEREF)
+	{
+		int reg0 = getReg();
+		int reg1 = codeGen(t->right, target_file);
+		fprintf(target_file, "MOV R%d, [R%d]\n ",reg0, reg1);
+		freeReg();
+		
+		return reg0;
+	}
+	else if(t->nodetype == ADDROF)
+	{
+		int varPos = getVarPos(t->right->varname);
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, %d\n ",reg0, varPos);
+		return reg0;
 	}
 	else 
 	//if(t->nodetype == PLUS || t->nodetype == MINUS || t->nodetype == MUL || t->nodetype == DIV)

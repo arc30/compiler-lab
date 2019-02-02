@@ -158,13 +158,13 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 {
 
 
-	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == ARR2D)
+	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == ARR2D || l->nodetype == DEREF)
 	{
 		if(l->type==NOTYPE)
 		{
 			printf("Undeclared variable %s\n", l->varname); exit(1);
 		}
-		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type)) 
+		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type) && !checkType(INTPTR,INTPTR, l->type,r->type) && !checkType(STRPTR,STRPTR, l->type,r->type)) 
 		{
 			printf("Type Error: Assignment Node:"); exit(1);
 		}
@@ -184,7 +184,7 @@ struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tno
 	//left node is null
 	if(nodetype == DEREF)
 	{
-		if(!checkType(NOTYPE, INTPTR, NOTYPE, r->type) || !checkType(NOTYPE, STRPTR, NOTYPE, r->type))
+		if(!checkType(NOTYPE, INTPTR, NOTYPE, r->type) && !checkType(NOTYPE, STRPTR, NOTYPE, r->type))
 		{
 			printf("Type Error: Dereference Node not of type ptr\n"); exit(1);
 		}
@@ -196,17 +196,25 @@ struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tno
 		{
 			type= STRTYPE;
 		}
-		return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
+		return createTree(-1,type,r->varname,nodetype,NULL,l,r,NULL);
 	}
 
 	else if(nodetype == ADDROF)
 	{
-		if(!checkType(NOTYPE, INTTYPE, NOTYPE, r->type) || !checkType(NOTYPE, STRTYPE, NOTYPE, r->type))
+		if(!checkType(NOTYPE, INTTYPE, NOTYPE, r->type) && !checkType(NOTYPE, STRTYPE, NOTYPE, r->type))
 		{
 			printf("Type Error: AddrOf Node not of type int/str\n"); exit(1);
 		}
+		if(type == INTTYPE)
+		{
+			type = INTPTR;
+		}
+		else if (type == STRTYPE)
+		{
+			type= STRPTR;
+		}
 
-		return createTree(-1,INTTYPE,NULL,nodetype,NULL,l,r,NULL);
+		return createTree(-1,type,r->varname,nodetype,NULL,l,r,NULL);
 	}
    else
    {
