@@ -516,7 +516,7 @@ void codeGenXsm(struct tnode* t, FILE* target_file)
 {
 	fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
 	fprintf(target_file, "BRKP\n");
-	fprintf(target_file, "MOV SP, 4121\n");	
+	fprintf(target_file, "MOV SP, %d\n", nextBindingAddr);	
 	//4095 + 26 for storing variables. a is in [4095+1]
 
 	int result = codeGen(t, target_file);

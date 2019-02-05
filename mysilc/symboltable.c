@@ -8,7 +8,7 @@
 Gsymbol *head = NULL;
 Gsymbol *tail = NULL;
 
-int BindingAddr = 4096;
+extern int nextBindingAddr = 4096;
 
 
 void printSymbolTable()
@@ -74,7 +74,7 @@ void install(char* name, int type, int size, int colSize) // Creates a symbol ta
 {
     endIfRedeclared(name);    
 
-    if(BindingAddr>5119)
+    if(nextBindingAddr>5119)
     {
         printf("ERROR: STACK OVERFLOW\n");
         exit(1);
@@ -86,10 +86,10 @@ void install(char* name, int type, int size, int colSize) // Creates a symbol ta
     strcpy(newEntry->name, name); 
     newEntry->type = type;
     newEntry->size = size; 
-    newEntry->binding = BindingAddr;
+    newEntry->binding = nextBindingAddr;
     newEntry->colSize = colSize;
 
-    BindingAddr += size;
+    nextBindingAddr += size;
 
     newEntry->next = NULL;
 

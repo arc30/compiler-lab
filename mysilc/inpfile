@@ -1,14 +1,10 @@
 decl
-int *p, *s, q,r;
+int arr[10];
 str a,b,*c;
 enddecl
 
 begin
-p=&q;
-q=5;
-*p = 9+q;
-write(q);
-write(*p+1);
+arr=5;
 
 
 end
