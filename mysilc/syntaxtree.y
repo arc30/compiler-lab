@@ -41,20 +41,20 @@
 	
 	
 	
-	start : declarations program	
+	program : GDeclBlock codeSection	
 		   ;
 
-	declarations : DECL declist ENDDECL		{printf("declaration list\n");
+	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
 											printSymbolTable();	
 											}
-				|	DECL ENDDECL			{printf("No decl list\n") ; }
+				|	DECL ENDDECL			{printf("No global decl list\n") ; }
 				;
 
-	declist : declist declr					{}			
-			|declr							{}
+	Gdeclist : Gdeclist Gdeclr					{}			
+			|Gdeclr							{}
 			;
 
-	declr	:  type varlist ';'				{}
+	Gdeclr	:  type varlist ';'				{}
 			;
 
 	type	: INT						{ currType = INTTYPE; }
@@ -92,12 +92,21 @@
 											}
 											
 										}
+			| ID '(' paramlist ')'		{
+											//install function in gsymboltable
+
+										}
 
 			;
 
+	paramlist : paramlist, param
+			  |	
+			  ;
+	param : type ID
+		  ;
 	
 
-	program : BEG slist END 
+	codeSection : BEG slist END 
 	{		
 
 		char* file1="targetfile.xsm";
@@ -277,6 +286,7 @@
 			$$ = makeOperatorNode(NOTEQUAL,BOOLTYPE, $1, $3);
 		}
 		
+	
 	;
 	
 	
