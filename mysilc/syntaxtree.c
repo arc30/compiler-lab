@@ -51,6 +51,10 @@ void checkTypeIfElse(int guardType, int thenType, int elseType )
 	
 }
 
+tnode* makeTypeNode(int type)
+{
+	return createTree(-1,type,NULL,-1,NULL,NULL,NULL,NULL);
+}
 
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
@@ -83,7 +87,7 @@ struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 
 struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 {
-	Gsymbol* temp = lookup(ch);
+	Gsymbol* temp = Glookup(ch);
 
 	//if lex encounters ID in declaration, there wont be a symbol table entry.
 	//if lex encounters ID in program, and ID is undeclared, there wont be a gEntry.
@@ -114,7 +118,7 @@ struct tnode* makeLeafNodeStringConst(int nodetype,char* ch)
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 {
 	char *name = l->varname;
-	Gsymbol* temp = lookup(name);
+	Gsymbol* temp = Glookup(name);
 	
 	int type = NOTYPE;
 
@@ -135,7 +139,7 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 tnode* make2DArrayNode(int nodetype, tnode* l, tnode* r1, tnode* r2)
 {
 	char *name = l->varname;
-	Gsymbol* temp = lookup(name);
+	Gsymbol* temp = Glookup(name);
 	
 	int type = NOTYPE;
 

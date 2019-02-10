@@ -93,7 +93,7 @@ void appendParamNode(char* name, int type)
     
 }
 
-Gsymbol* lookup(char* name)
+Gsymbol* Glookup(char* name)
 {
     Gsymbol* temp = head;
     while(temp!=NULL)
@@ -182,3 +182,7 @@ void GinstallVar(char* name, int type, int size, int colSize)
 {
     Ginstall(name,type,size,colSize,-1,NULL);
 }
+
+
+
+

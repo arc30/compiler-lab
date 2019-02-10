@@ -23,7 +23,7 @@ typedef struct Gsymbol
 
 
 
-Gsymbol* lookup(char* name); // Returns a pointer to the symbol table entry for the variable, returns NULL otherwise.
+Gsymbol* Glookup(char* name); // Returns a pointer to the symbol table entry for the variable, returns NULL otherwise.
 
 void Ginstall(char* name, int type, int size, int colSize, int flabel, struct paramStruct* paramlist ); // Creates a symbol table entry.
 

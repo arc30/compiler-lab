@@ -7,9 +7,11 @@
 
 	#include "codegen.h"
 
+	#include "funcdef.c" //TODOOOOO MAKE IT .h
 	#include "syntaxtree.h"
 
 	#include "symboltable.h"
+	
 
 	#define YYSTYPE tnode *
 	
@@ -20,6 +22,7 @@
 	
 
 	int currType = NOTYPE;
+	int returnType = NOTYPE;
 
 	
 	
@@ -44,7 +47,9 @@
 	
 	
 	
-	program : GDeclBlock codeSection	
+	program : GDeclBlock FDefBlock codeSection
+			| GDeclBlock codeSection
+			| codeSection	
 		   ;
 
 	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
@@ -60,15 +65,22 @@
 	Gdeclr	:  type varlist ';'				{}
 			;
 
-	type	: INT						{ currType = INTTYPE; }
-			| STR						{ currType = STRTYPE; }
+	type	: INT						{ 
+											currType = INTTYPE; 
+											$$ = makeTypeNode(INTTYPE);
+										}
+			| STR						{   
+											 currType = STRTYPE; 
+											 $$ = makeTypeNode(STRTYPE);
+										}
 			;
 
 	varlist : varlist ',' var				
-			| var
+			| var					
 			;
 
 
+	fname : ID 			{	$$ = $1; returnType = currType;	}	
 	
 	var : 		ID						{
 										 GinstallVar($1->varname, currType, 1, 0);
@@ -79,27 +91,12 @@
 			| ID '[' NUM ']' '[' NUM ']'{
 										GinstallVar($1->varname, currType, ($3->val)*($6->val), $6->val);
 										}
-			| MUL ID					{	//same as *ID
 
-											if(currType == INTTYPE)
-											{
-												GinstallVar($2->varname, INTPTR, 1, 0);
-											}
-											else if(currType == STRTYPE)
-											{
-												GinstallVar($2->varname, STRPTR, 1, 0);
-											}
-											else
-											{
-												printf("%d Error *id", currType); exit(1);
-											}
-											
-										}
-			| ID '(' paramlist ')'		{
+			| fname '(' paramlist ')'		{
 											//Ginstall function in gsymboltable
 											
-
-											GinstallFunc($1->varname, currType, fetchParamHead());
+											
+											GinstallFunc($1->varname, returnType, fetchParamHead());
 											resetParamHeadTail();
 
 										}
@@ -110,15 +107,47 @@
 
 	paramlist :%empty 
 			  |paramlist ',' param
-			  | param
+			  | param	{}
 			  ;
 	
-	param : type ID					{ appendParamNode($2->varname,currType);	}
+	param : type ID		{   
+							appendParamNode($2->varname,$1->type);	
+						}
 		  ;
 
+    FDefBlock : FDefBlock FDef
+			  | FDef
+			  ;
 	
+	FDef	  : type ID '(' paramlist ')' '{' LDeclBlock Body '}'
+				{
+					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
+					resetParamHeadTail();
 
-	codeSection : BEG slist END 
+				}
+			  ;
+
+	LDeclBlock : DECL LDeclList ENDDECL 
+			   | DECL ENDDECL
+			   ;
+
+	LDeclList : LDeclList LDecl 
+			   | LDecl
+			   ;
+
+	LDecl		: type IDList ';'
+				{
+				
+				}
+				;		
+
+	IDList      : IDList ',' ID
+				| ID
+				;
+
+
+
+	codeSection : BEG Body END 
 	{		
 
 		char* file1="targetfile.xsm";
@@ -148,6 +177,8 @@
 
 
 
+	Body  : slist
+		  ;
 
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }
 	| stmt	{ $$ = $1;	}
@@ -177,7 +208,7 @@
 			  | ID '[' expr ']' '[' expr ']' ASSGN expr ';'
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', make2DArrayNode(ARR2D,$1,$3, $6), $9); }
 
-			  | MUL ID ASSGN expr ';'	{ $$ = makeAssignmentNode(ASSGN,'=', makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 ), $4 );	}
+			 
 			  ;	
 
 	
@@ -215,17 +246,7 @@
 				}
 			;
 
-	expr : MUL ID
-			{
-				$$ = makeOperatorNode(DEREF, $2->gEntry->type, NULL, $2 );
-			}
-	| ADDROF ID
-			{
-				$$ = makeOperatorNode(ADDROF, $2->gEntry->type, NULL, $2);
-			}
-
-	
-	|expr PLUS expr 
+	expr : expr PLUS expr 
 			{
 				$$ = makeOperatorNode(PLUS,INTTYPE,$1,$3);
 			}
@@ -297,9 +318,13 @@
 		{
 			$$ = makeOperatorNode(NOTEQUAL,BOOLTYPE, $1, $3);
 		}
-		
-	
+	| ID '(' ')'
+	| ID '(' arglist ')'
 	;
+
+	arglist : arglist ',' expr
+	        | expr
+			;
 	
 	
 	%%

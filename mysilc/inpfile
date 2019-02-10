@@ -1,12 +1,27 @@
 decl
 int arr[10];
 int a;
-int func1(int a,int b, str x);
-int func2();
-str fact(int n);
-int b,c;
-
+int func1(int a, int c, str c);
+str func2(str a);
+int fu3;
 enddecl
+
+int func1(int a, int c, str c)
+{   
+    decl
+    str b;
+    enddecl
+
+    write(b);
+}
+
+str func2(str a)
+{
+    decl
+    int c;
+    enddecl
+    a=1;
+}
 
 begin
 

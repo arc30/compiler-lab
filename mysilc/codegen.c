@@ -77,7 +77,7 @@ void endIfUndeclared(char* ch, Gsymbol* temp)
 //returns stackPos for variable
 int getVarPos(char* ch)
 {
-	Gsymbol* temp = lookup(ch);
+	Gsymbol* temp = Glookup(ch);
 	
 	endIfUndeclared(ch, temp);
 
