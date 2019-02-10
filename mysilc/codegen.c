@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 static int freeRegister=0;
-
+extern nextBindingAddr;
 int loopStack[20];	//for keeping track of loop begin and end : for breakstmt
 int top=-1; 			//top for loop stack
 
@@ -517,7 +517,7 @@ void codeGenXsm(struct tnode* t, FILE* target_file)
 	fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
 	fprintf(target_file, "BRKP\n");
 	fprintf(target_file, "MOV SP, %d\n", nextBindingAddr);	
-	//4095 + 26 for storing variables. a is in [4095+1]
+	
 
 	int result = codeGen(t, target_file);
 	

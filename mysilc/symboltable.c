@@ -8,8 +8,11 @@
 Gsymbol *head = NULL;
 Gsymbol *tail = NULL;
 
-extern int nextBindingAddr = 4096;
+paramStruct* paramHead = NULL;		//for parameters
+paramStruct* paramTail = NULL;
 
+int nextBindingAddr = 4096;
+int funcLabel = 0;
 
 void printSymbolTable()
 {
@@ -34,10 +37,60 @@ void printSymbolTable()
             default: 
                 printf("Unknown type %d: ERR ",temp->type );
         }
-        printf("%d  %d  %d\n", temp->size, temp->binding, temp->colSize);
+        printf("\n%d  %d \n", temp->size, temp->binding);
+        printf("Func label: f%d\n",temp->flabel);
+        printf("Parameters : ");
+            if(temp->paramlist!=NULL)
+            {
+                paramStruct* tempptr = temp->paramlist;
+                while(tempptr != NULL)
+                {
+                    if(tempptr->paramType == INTTYPE) 
+                        printf("INT ");
+                    else if(tempptr->paramType == STRTYPE)
+                        printf("STR ");
+                    else 
+                        printf("ERR TYPE");
+
+                    printf("%s ",tempptr->paramName);
+                    tempptr = tempptr->next;
+                }
+                printf("\n");
+            }
+            printf("\n\n");
 
         temp=temp->next;
     }
+}
+
+paramStruct* createParamNode(char* name, int type)
+{
+   paramStruct* newEntry = (paramStruct*)malloc(sizeof(paramStruct));
+   if(newEntry == NULL)
+   {
+       printf("Error in Param node creation"); exit(0);
+   }
+   newEntry->paramName = name;
+   newEntry->paramType = type;
+   newEntry->next = NULL;
+
+    return newEntry;
+}
+
+void appendParamNode(char* name, int type)
+{
+    paramStruct* temp = createParamNode(name, type);
+    if(paramHead == NULL)
+    {
+        paramHead = temp;
+        paramTail = temp;
+    }
+    else
+    {
+        paramTail->next = temp;
+        paramTail = temp;
+    }
+    
 }
 
 Gsymbol* lookup(char* name)
@@ -70,7 +123,18 @@ void endIfRedeclared(char* name)
     }
 }
 
-void install(char* name, int type, int size, int colSize) // Creates a symbol table entry.
+void resetParamHeadTail()
+{
+    paramHead = NULL;
+    paramTail = NULL;
+}
+
+paramStruct* fetchParamHead()
+{
+    return paramHead;
+}
+
+void Ginstall(char* name, int type, int size, int colSize, int flabel, struct paramStruct* paramlist) // Creates a symbol table entry.
 {
     endIfRedeclared(name);    
 
@@ -91,6 +155,9 @@ void install(char* name, int type, int size, int colSize) // Creates a symbol ta
 
     nextBindingAddr += size;
 
+    newEntry->flabel = flabel;
+    newEntry->paramlist = paramlist;
+
     newEntry->next = NULL;
 
     if(head == NULL)
@@ -104,4 +171,14 @@ void install(char* name, int type, int size, int colSize) // Creates a symbol ta
         tail = newEntry;
     }
 
+}
+
+void GinstallFunc(char* name, int type, paramStruct* paramlist)
+{
+    Ginstall(name,type,0,0,funcLabel,paramlist);
+    funcLabel++;
+}
+void GinstallVar(char* name, int type, int size, int colSize)
+{
+    Ginstall(name,type,size,colSize,-1,NULL);
 }

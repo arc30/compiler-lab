@@ -1,10 +1,15 @@
 decl
 int arr[10];
-str a,b,*c;
+int a;
+int func1(int a,int b, str x);
+int func2();
+str fact(int n);
+int b,c;
+
 enddecl
 
 begin
-arr=5;
 
+read(a);
 
 end

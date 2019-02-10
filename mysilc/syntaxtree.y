@@ -17,8 +17,11 @@
 	extern int yyparse();
 	extern FILE *yyin;
 	extern FILE *ltin;
+	
 
 	int currType = NOTYPE;
+
+	
 	
 %}
 
@@ -68,23 +71,23 @@
 
 	
 	var : 		ID						{
-										 install($1->varname, currType, 1, 0);
+										 GinstallVar($1->varname, currType, 1, 0);
 										}
 			| ID '[' NUM ']'			{
-										 install($1->varname, currType, $3->val, 0);
+										 GinstallVar($1->varname, currType, $3->val, 0);
 										}
 			| ID '[' NUM ']' '[' NUM ']'{
-										install($1->varname, currType, ($3->val)*($6->val), $6->val);
+										GinstallVar($1->varname, currType, ($3->val)*($6->val), $6->val);
 										}
 			| MUL ID					{	//same as *ID
 
 											if(currType == INTTYPE)
 											{
-												install($2->varname, INTPTR, 1, 0);
+												GinstallVar($2->varname, INTPTR, 1, 0);
 											}
 											else if(currType == STRTYPE)
 											{
-												install($2->varname, STRPTR, 1, 0);
+												GinstallVar($2->varname, STRPTR, 1, 0);
 											}
 											else
 											{
@@ -93,17 +96,26 @@
 											
 										}
 			| ID '(' paramlist ')'		{
-											//install function in gsymboltable
+											//Ginstall function in gsymboltable
+											
+
+											GinstallFunc($1->varname, currType, fetchParamHead());
+											resetParamHeadTail();
 
 										}
 
+			
+
 			;
 
-	paramlist : paramlist, param
-			  |	
+	paramlist :%empty 
+			  |paramlist ',' param
+			  | param
 			  ;
-	param : type ID
+	
+	param : type ID					{ appendParamNode($2->varname,currType);	}
 		  ;
+
 	
 
 	codeSection : BEG slist END 
@@ -113,7 +125,7 @@
 
 		printf("Generating AST, inorderForm is \n");
 		inorderForm($2);
-	
+	/*
 		printf("\n\nCalling codegen \n");
 		FILE *fptr = fopen(file1,"w");
 		codeGenXsm($2, fptr);
@@ -125,7 +137,7 @@
 		ltlex();
 
 		fclose(ltin);
-		
+	*/	
 		return 1;
 
 
