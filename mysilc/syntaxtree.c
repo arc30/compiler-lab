@@ -6,7 +6,8 @@
 #include "symboltable.h"
 
 
-struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+
+struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
@@ -22,6 +23,7 @@ struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEnt
 	}
 
 	temp->gEntry = gEntry;
+	temp->lEntry = lEntry;
 
 	temp->nodetype = nodetype;
 	temp->left=l;
@@ -29,6 +31,11 @@ struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEnt
 	temp->extraRight = elseptr;
 }
 
+tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+{
+	return createTreeWithLenty(val, type, c, nodetype, gEntry, NULL, l, r, elseptr );
+
+}
 
 
 int checkType(int expectedOperand1Type, int expectedOperand2Type, int operand1type, int operand2type)
@@ -56,6 +63,13 @@ tnode* makeTypeNode(int type)
 	return createTree(-1,type,NULL,-1,NULL,NULL,NULL,NULL);
 }
 
+tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
+{
+	Lsymbol* lHead = fetchLsymbolHead();
+
+	return createTreeWithLenty(-1,type,ch,nodetype,l->gEntry,lHead,l,r,NULL);
+}
+
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
 	//checkType(NOTYPE,NOTYPE,-1, l->type, r->type, -1);
@@ -72,7 +86,7 @@ struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 	//if(! checkType(-1,INTTYPE, -1,lr->type) )
 	if(!checkType(-1, INTTYPE, NOTYPE, lr->type) && !checkType(-1, STRTYPE, NOTYPE, lr->type))
 		{
-			printf("Type Error: Read Node \n"); exit(1);
+			printf("\nType Error: Read Node \n"); exit(1);
 		}
 	
 	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,lr,NULL);
@@ -82,21 +96,32 @@ struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
 		//TODO 
 		//HOW TO CHECK TYPE? CANT be done at static time no!!
-		return createTree(-1,-1,NULL,nodetype,NULL,NULL,lr,NULL);
+	if(lr->type==NOTYPE)
+	{
+		printf("\nType ERR: write node\n"); exit(1);
+	}
+
+	return createTree(-1,-1,NULL,nodetype,NULL,NULL,lr,NULL);
 }
 
 struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 {
 	Gsymbol* temp = Glookup(ch);
+	Lsymbol* Ltemp = Llookup(ch);
 
-	//if lex encounters ID in declaration, there wont be a symbol table entry.
+
+	//if lex encounters ID in globdeclaration, there wont be a symbol table entry.
 	//if lex encounters ID in program, and ID is undeclared, there wont be a gEntry.
 
 	//TODO catch Undeclared var later.
 	int type = NOTYPE;
 
+	if(Ltemp != NULL)
+	{
+		type = Ltemp->type;
+	}
 
-	if(temp!=NULL)
+	else if(temp!=NULL)
 	{
 		type = temp->type;
 	}
@@ -168,9 +193,9 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 		{
 			printf("Undeclared variable %s\n", l->varname); exit(1);
 		}
-		if(l->nodetype == ID && l->gEntry->size > 1 ) // to check size is 1. to disallow <<int arr[10]; arr=expr>>
-		{
-			printf("Variable %s size doesnt match\n ", l->varname); exit(1);
+		if(l->nodetype == ID && l->gEntry!=NULL  ) // to check size is 1. to disallow <<int arr[10]; arr=expr>>
+		{   if(l->gEntry->size>1)
+				printf("Variable %s size doesnt match\n ", l->varname); exit(1);
 		}
 		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type) && !checkType(INTPTR,INTPTR, l->type,r->type) && !checkType(STRPTR,STRPTR, l->type,r->type)) 
 		{
@@ -363,6 +388,9 @@ void printValue(struct tnode *t)
 			break;
 		case ADDROF:
 			printf("& ");
+			break;
+		case FUNC:
+			printf("{} ");
 			break;
 		default:
 			printf("unknown nodetype, %d ",t->nodetype);

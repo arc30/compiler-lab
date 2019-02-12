@@ -17,12 +17,15 @@ typedef struct tnode
 	char* varname;
 	int nodetype;
 	Gsymbol* gEntry;
+	Lsymbol* lEntry;
 	struct tnode *left, *right, *extraRight;
 }tnode;
 
 
 
 /*Make a leaf tnode and set the value of val field*/
+struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
+
 struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
 	
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r);
@@ -55,6 +58,7 @@ tnode* makeContinueNode(int nodetype);
 
 void inorderForm(struct tnode* t);
 
+tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r);
 
 
 

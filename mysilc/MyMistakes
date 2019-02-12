@@ -1,4 +1,14 @@
 1) Corrected popAllRegisters during stage4-arr2d
 2) Major bug in pushAll and popAll. inconsistency in freeRegister
 3) a=b=c?
-4) sp set to where static ends
+4) sp set to where static 
+5) returnType bug
+
+
+
+
+
+
+TO ASK SIR:
+1)way to avoid returnType?
+

@@ -8,6 +8,16 @@ typedef struct paramStruct
 	struct paramStruct* next;
 }paramStruct;
 
+typedef struct Lsymbol
+{
+	char *name;               //name of the variable
+	int type;
+	int binding;              //stores memory address allocated to the variable 
+	struct Lsymbol *next;     //points to the next Local Symbol Table entry
+
+}Lsymbol;
+
+
 
 typedef struct Gsymbol 
 {
@@ -21,7 +31,8 @@ typedef struct Gsymbol
 	struct Gsymbol *next;
 }Gsymbol; 
 
-
+Lsymbol* Llookup(char* name);
+void Linstall(char* name, int type, int appendToBeg);
 
 Gsymbol* Glookup(char* name); // Returns a pointer to the symbol table entry for the variable, returns NULL otherwise.
 
@@ -32,6 +43,7 @@ void GinstallFunc(char* name, int type, struct paramStruct* paramlist );
 
 paramStruct* createParamNode(char* name, int type);
 void appendParamNode(char* name, int type);
+paramStruct* fetchParamHead();
 
 
 

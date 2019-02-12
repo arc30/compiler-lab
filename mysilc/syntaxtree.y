@@ -7,7 +7,7 @@
 
 	#include "codegen.h"
 
-	#include "funcdef.c" //TODOOOOO MAKE IT .h
+	#include "funcdef.h" //TODOOOOO MAKE IT .h
 	#include "syntaxtree.h"
 
 	#include "symboltable.h"
@@ -23,6 +23,7 @@
 
 	int currType = NOTYPE;
 	int returnType = NOTYPE;
+	int inDeclFlag = 0;
 
 	
 	
@@ -30,7 +31,7 @@
 
 %error-verbose
 	
-	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE 
+	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE FUNC
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
 	%token REPEAT UNTIL
 	%token DECL ENDDECL INT STR STRCONST
@@ -47,7 +48,12 @@
 	
 	
 	
-	program : GDeclBlock FDefBlock codeSection
+	program : GDeclBlock FDefBlock codeSection 
+				{	
+					printf("\nGenerating AST for FDef, inorderForm is \n");
+					inorderForm($2);		
+			
+				}		
 			| GDeclBlock codeSection
 			| codeSection	
 		   ;
@@ -80,7 +86,10 @@
 			;
 
 
-	fname : ID 			{	$$ = $1; returnType = currType;	}	
+	fname : ID 			{	
+							$$ = $1; 
+							returnType = currType;
+						}	
 	
 	var : 		ID						{
 										 GinstallVar($1->varname, currType, 1, 0);
@@ -98,7 +107,8 @@
 											
 											GinstallFunc($1->varname, returnType, fetchParamHead());
 											resetParamHeadTail();
-
+											
+											
 										}
 
 			
@@ -115,20 +125,32 @@
 						}
 		  ;
 
-    FDefBlock : FDefBlock FDef
-			  | FDef
+    FDefBlock : FDefBlock FDef{ $$=makeConnectorNode(CONNECTOR, $1, $2); }
+			  | FDef		{ $$=$1; }
 			  ;
 	
 	FDef	  : type ID '(' paramlist ')' '{' LDeclBlock Body '}'
 				{
 					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
+
+					$$ = makeFuncdefNode(FUNC,$2->varname,$1->type,$2,$8);
+
+					printf("\nLsymbol Table\n");
+					printLocalSymbolTable();
+
+
+					freeLsymbolTable();
 					resetParamHeadTail();
+
 
 				}
 			  ;
 
-	LDeclBlock : DECL LDeclList ENDDECL 
-			   | DECL ENDDECL
+	LDeclBlock : DECL LDeclList ENDDECL { 
+										LinstallParameters(fetchParamHead()); 	
+										//Linstall in the begng
+										}
+			   | DECL ENDDECL { LinstallParameters(fetchParamHead()); }
 			   ;
 
 	LDeclList : LDeclList LDecl 
@@ -142,7 +164,7 @@
 				;		
 
 	IDList      : IDList ',' ID
-				| ID
+				| ID	{LinstallVar($1->varname, currType);}
 				;
 
 
@@ -152,7 +174,7 @@
 
 		char* file1="targetfile.xsm";
 
-		printf("Generating AST, inorderForm is \n");
+		printf("\nGenerating AST, inorderForm is \n");
 		inorderForm($2);
 	/*
 		printf("\n\nCalling codegen \n");
@@ -167,7 +189,6 @@
 
 		fclose(ltin);
 	*/	
-		return 1;
 
 
 	}
@@ -177,7 +198,7 @@
 
 
 
-	Body  : slist
+	Body  : slist	{$$=$1;}
 		  ;
 
 	slist : slist stmt { $$=makeConnectorNode(CONNECTOR,$1,$2); }

@@ -8,6 +8,9 @@
 Gsymbol *head = NULL;
 Gsymbol *tail = NULL;
 
+Lsymbol *LsymbolHead = NULL;
+Lsymbol *LsymbolTail = NULL;
+
 paramStruct* paramHead = NULL;		//for parameters
 paramStruct* paramTail = NULL;
 
@@ -63,6 +66,7 @@ void printSymbolTable()
     }
 }
 
+
 paramStruct* createParamNode(char* name, int type)
 {
    paramStruct* newEntry = (paramStruct*)malloc(sizeof(paramStruct));
@@ -116,12 +120,27 @@ void endIfRedeclared(char* name)
     {
         if(strcmp(name, temp->name)==0)
         {
-            printf("ERROR : Multiple declaration of variable\n");
+            printf("ERROR : Multiple declaration of global variable\n");
             exit(1);
         }
         temp=temp->next;
     }
 }
+
+void endIfRedeclaredLocally(char* name)
+{
+    Lsymbol* temp = LsymbolHead;
+    while(temp)
+    {
+        if(strcmp(name, temp->name)==0)
+        {
+            printf("ERROR : Multiple declaration of local variable\n");
+            exit(1);
+        }
+        temp=temp->next;
+    }
+}
+
 
 void resetParamHeadTail()
 {
@@ -132,6 +151,11 @@ void resetParamHeadTail()
 paramStruct* fetchParamHead()
 {
     return paramHead;
+}
+
+Lsymbol* fetchLsymbolHead()
+{
+    return LsymbolHead;
 }
 
 void Ginstall(char* name, int type, int size, int colSize, int flabel, struct paramStruct* paramlist) // Creates a symbol table entry.
@@ -184,5 +208,92 @@ void GinstallVar(char* name, int type, int size, int colSize)
 }
 
 
+void Linstall(char* name, int type, int appendToBeg)
+{
+    endIfRedeclaredLocally(name);
+    Lsymbol* newEntry = (Lsymbol*)malloc(sizeof(Lsymbol));
+    newEntry->name = (char*)malloc(strlen(name)+1);
+    strcpy(newEntry->name, name);
+    newEntry->type = type;
+    newEntry->binding = 0;
+
+    newEntry->next = NULL;
+    if(LsymbolHead == NULL)
+    {
+        LsymbolHead = newEntry;
+        LsymbolTail = newEntry;
+    }
+    else if(appendToBeg == 1)
+    {
+        newEntry->next = LsymbolHead;
+        LsymbolHead = newEntry;
+    }
+    else    //addToTheEnd
+    {
+        LsymbolTail->next = newEntry;
+        LsymbolTail = newEntry;
+    }
+}
+
+void LinstallVar(char* name, int type)
+{
+    Linstall(name, type, 0);
+}
+
+void LinstallParameters(paramStruct* paramlist)
+{
+    if(paramlist != NULL)
+    {
+        LinstallParameters(paramlist->next);
+        Linstall(paramlist->paramName, paramlist->paramType,1);
+       // paramlist = paramlist->next;
+    }
+}
+
+void freeLsymbolTable()
+{
+    //free the entire space?
+    LsymbolHead = NULL;
+    LsymbolTail = NULL;
+}
+
+Lsymbol* Llookup(char* name)
+{
+    Lsymbol* temp = LsymbolHead;
+    while(temp!=NULL)
+    {
+        if(strcmp(temp->name, name)==0)
+            {        
+            return temp;
+            }
+        temp=temp->next;
+    }
+    return NULL;
+}
+
+
+void printLocalSymbolTable()
+{
+    Lsymbol*temp = LsymbolHead;
+    while(temp!=NULL)
+    {
+        puts(temp->name);
+        switch(temp->type)
+        {
+            case INTTYPE:
+                printf("INT ");
+                break;
+            case STRTYPE:
+                printf("STR ");
+                break;
+            default: 
+                printf("Unknown type %d: ERR ",temp->type );
+        }
+        printf("\n %d \n",  temp->binding);
+      
+
+        temp=temp->next;
+    }
+}
 
 

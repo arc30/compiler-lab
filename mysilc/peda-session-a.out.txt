@@ -1,4 +1,2 @@
-break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:114
-break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:117
-break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:116
+break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.c:111
 

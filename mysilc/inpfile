@@ -1,30 +1,30 @@
 decl
-int arr[10];
-int a;
-int func1(int a, int c, str c);
-str func2(str a);
-int fu3;
+
+int func1(int a);
+int func2(int c);
+int b;
 enddecl
 
-int func1(int a, int c, str c)
+int func1(int a)
 {   
     decl
-    str b;
     enddecl
-
-    write(b);
+    
+    a=4;
 }
 
-str func2(str a)
+int func2(int c)
 {
     decl
-    int c;
     enddecl
-    a=1;
+
+    c=3;
+    read(a);
 }
+
 
 begin
 
-read(a);
+
 
 end
