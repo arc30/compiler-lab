@@ -189,13 +189,16 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 
 	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == ARR2D || l->nodetype == DEREF)
 	{
+
 		if(l->type==NOTYPE)
 		{
 			printf("Undeclared variable %s\n", l->varname); exit(1);
 		}
 		if(l->nodetype == ID && l->gEntry!=NULL  ) // to check size is 1. to disallow <<int arr[10]; arr=expr>>
-		{   if(l->gEntry->size>1)
-				printf("Variable %s size doesnt match\n ", l->varname); exit(1);
+		{   if((l->gEntry->size)>1)
+				{
+					printf("Variable %s size doesnt match\n ", l->varname); exit(1);
+				}
 		}
 		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type) && !checkType(INTPTR,INTPTR, l->type,r->type) && !checkType(STRPTR,STRPTR, l->type,r->type)) 
 		{

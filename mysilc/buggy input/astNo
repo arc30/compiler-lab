@@ -1,5 +1,5 @@
 decl
-int a,b;
+int a, int b;
 int func1(int a);
 int func2(int c,str a);
 

@@ -7,7 +7,7 @@
 
 	#include "codegen.h"
 
-	#include "funcdef.h" //TODOOOOO MAKE IT .h
+	#include "funcdef.h" 
 	#include "syntaxtree.h"
 
 	#include "symboltable.h"
@@ -23,7 +23,6 @@
 
 	int currType = NOTYPE;
 	int returnType = NOTYPE;
-	int inDeclFlag = 0;
 
 	
 	
@@ -54,8 +53,8 @@
 					inorderForm($2);		
 			
 				}		
-			| GDeclBlock codeSection
-			| codeSection	
+			| GDeclBlock codeSection {printf("\n gdecl code\n");}
+			| codeSection	{printf("\ncode\n");}
 		   ;
 
 	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
@@ -135,7 +134,7 @@
 
 					$$ = makeFuncdefNode(FUNC,$2->varname,$1->type,$2,$8);
 
-					printf("\nLsymbol Table\n");
+					printf("\nLsymbol Table of %s\n", $2->varname);
 					printLocalSymbolTable();
 
 
