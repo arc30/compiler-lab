@@ -30,8 +30,8 @@
 
 %error-verbose
 	
-	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE FUNC
-	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE
+	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE FUNC FUNCCALL
+	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE RETURN
 	%token REPEAT UNTIL
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
@@ -212,6 +212,7 @@
 		| repeatuntilstmt	{$$ =$1;}
 		| breakstmt {$$=$1;}
 		| continuestmt	{$$=$1;}
+		| returnstmt	{$$ = $1;}
 	;
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
@@ -265,6 +266,9 @@
 					$$ = makeContinueNode(CONTINUE);
 				}
 			;
+
+	returnstmt : RETURN expr ';'	{ $$ = makeReturnNode(RETURN, $2);	}
+			   ;
 
 	expr : expr PLUS expr 
 			{
@@ -338,12 +342,19 @@
 		{
 			$$ = makeOperatorNode(NOTEQUAL,BOOLTYPE, $1, $3);
 		}
-	| ID '(' ')'
-	| ID '(' arglist ')'
+	| ID '(' ')'	{ $$ = makeFuncCallNode(FUNCCALL, $1->varname, NULL); }
+	| ID '(' exprlist ')'	{ $$ = makeFuncCallNode(FUNCCALL, $$->varname, $3); }
 	;
 
-	arglist : arglist ',' expr
-	        | expr
+	exprlist : exprlist ',' expr	{   tnode* temp = $1;
+										while(temp != NULL && temp->argslist!=NULL)
+										{
+											temp=temp->argslist;
+										}
+										temp->argslist = $3;
+										$$ = $1;
+									}
+	        | expr	{$$ = $1;}
 			;
 	
 	

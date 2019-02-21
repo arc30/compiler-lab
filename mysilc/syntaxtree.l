@@ -50,6 +50,7 @@
 "break"	{return BREAK;}
 "continue"	{return CONTINUE;}
 "repeat"	{return REPEAT;}
+"return"	{return RETURN;}
 "until"		{return UNTIL;}
 
 "decl"		{return DECL;}

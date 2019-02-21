@@ -448,6 +448,10 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "MOV R%d, %d\n ",reg0, varPos);
 		return reg0;
 	}
+	
+
+
+
 	else 
 	//if(t->nodetype == PLUS || t->nodetype == MINUS || t->nodetype == MUL || t->nodetype == DIV)
 	{

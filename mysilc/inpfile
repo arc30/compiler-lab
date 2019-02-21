@@ -1,28 +1,44 @@
 decl
 int a,b;
-int func1(int a);
-int func2(int c,str a);
+int func2(int c,int a);
+int c;
+int aa();
+int d,e;
+str func4(int e, int f);
 
 enddecl
 
-int func1(int a)
-{   
+
+int func2(int c, int a)
+{
     decl
+    int k,b;
     enddecl
-    
-    a=4;
+
+    c=3;
+    return "hi";
 }
 
-int func2(int c, str a)
+int aa()
+{
+    decl
+    enddecl
+    a=7;
+}
+
+str func4(int e, int f)
 {
     decl
     enddecl
 
-    c=3;
+    e=6;
 }
+
 
 
 begin
 
+b=func2(3,6);
+write(b);
 
 end

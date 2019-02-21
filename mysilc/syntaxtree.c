@@ -6,8 +6,7 @@
 #include "symboltable.h"
 
 
-
-struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+tnode* createTreeWithArglist(int val, int type, char* c, int nodetype, tnode* argslist, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr)
 {
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
@@ -26,14 +25,30 @@ struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsym
 	temp->lEntry = lEntry;
 
 	temp->nodetype = nodetype;
+	temp->argslist = argslist;
+
 	temp->left=l;
 	temp->right=r;
 	temp->extraRight = elseptr;
 }
 
+struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+{
+
+	return createTreeWithArglist(val, type, c, nodetype, NULL, gEntry, lEntry, l, r, elseptr);
+}
+
 tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
-	return createTreeWithLenty(val, type, c, nodetype, gEntry, NULL, l, r, elseptr );
+	//add lEntry if exists and if nodetype is ID 
+	
+	Lsymbol* lEntry = NULL;
+	if(nodetype == ID)
+	{
+		lEntry = Llookup(c);
+	}		
+
+	return createTreeWithLenty(val, type, c, nodetype, gEntry, lEntry, l, r, elseptr );
 
 }
 
@@ -58,9 +73,49 @@ void checkTypeIfElse(int guardType, int thenType, int elseType )
 	
 }
 
+void checkTypeFuncCall(tnode* funccall)
+{
+	Gsymbol* temp = Glookup(funccall->varname);
+	if(funccall->type != temp->type)
+	{
+		printf("Ret Type Error func call %s\n", funccall->varname); exit(1);
+	}
+	
+	paramStruct* pTemp = temp->paramlist;
+	tnode* fTemp = funccall;
+
+	while(fTemp->argslist != NULL && pTemp != NULL)
+	{
+		if(fTemp->argslist->type != pTemp->paramType)
+		{
+		printf("arg Type Error func call %s\n", funccall->varname); exit(1);
+		}
+		fTemp = fTemp->argslist;
+		pTemp= pTemp->next;
+	}
+
+	//check if num of args match
+	if(pTemp!=NULL || fTemp->argslist!=NULL)
+	{
+		printf("arg num mismatch Error func call %s\n", funccall->varname);  exit(1);
+	}
+
+}
+
 tnode* makeTypeNode(int type)
 {
 	return createTree(-1,type,NULL,-1,NULL,NULL,NULL,NULL);
+}
+
+tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )
+{
+	int type = NOTYPE;
+	Gsymbol* temp = Glookup(c);
+	if(temp!=NULL)
+	{
+		type = temp->type;
+	}
+	return createTreeWithArglist(-1, type, c, nodetype, arglist, NULL, NULL, NULL, NULL, NULL);
 }
 
 tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
@@ -208,7 +263,15 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 
 	else
 	{
-		printf("ERROR in ASSIGN Node. lvalue other than arr and id"); exit(1);
+		printf("ERROR in ASSIGN Node. lvalue unknown"); exit(1);
+	}
+
+	if(r->nodetype == FUNCCALL)
+	{
+		printf("rval of assgn is funccall\n"); 
+		//type check
+		checkTypeFuncCall(r);
+		
 	}
 
 	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r,NULL);
@@ -304,6 +367,11 @@ tnode* makeContinueNode(int nodetype)
 	return createTree(-1,NOTYPE,NULL,nodetype, NULL, NULL,NULL,NULL);
 }
 
+tnode* makeReturnNode(int nodetype, tnode* expr)
+{
+	return createTree(-1,expr->type, NULL, nodetype, NULL, NULL,expr, NULL);
+}
+
 void printValue(struct tnode *t)
 {
 	
@@ -374,6 +442,9 @@ void printValue(struct tnode *t)
 		case CONTINUE:
 			printf("CONTINUE ");
 			break;
+		case RETURN:
+			printf("RETURN ");
+			break;
 		case REPEAT:
 			printf("REPEAT UNTIL ");
 			break;
@@ -394,6 +465,19 @@ void printValue(struct tnode *t)
 			break;
 		case FUNC:
 			printf("{} ");
+			break;
+		case FUNCCALL:
+			printf("%s( ", t->varname);
+			while(t->argslist != NULL)
+			{
+				inorderForm(t->argslist);
+				if(t->argslist->argslist !=NULL)
+				{
+					printf(",");
+				}
+				t=t->argslist;
+			}
+			printf(") ");
 			break;
 		default:
 			printf("unknown nodetype, %d ",t->nodetype);

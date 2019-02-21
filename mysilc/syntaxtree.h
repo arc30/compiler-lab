@@ -16,6 +16,7 @@ typedef struct tnode
 	int type;
 	char* varname;
 	int nodetype;
+	struct tnode* argslist;
 	Gsymbol* gEntry;
 	Lsymbol* lEntry;
 	struct tnode *left, *right, *extraRight;
@@ -60,6 +61,7 @@ void inorderForm(struct tnode* t);
 
 tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r);
 
+tnode* makeReturnNode(int nodetype, tnode* expr);
 
 
 
