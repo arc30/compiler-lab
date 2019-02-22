@@ -162,7 +162,7 @@
 				}
 				;		
 
-	IDList      : IDList ',' ID
+	IDList      : IDList ',' ID {LinstallVar($3->varname, currType);}
 				| ID	{LinstallVar($1->varname, currType);}
 				;
 
@@ -171,11 +171,11 @@
 	codeSection : BEG Body END 
 	{		
 
-		char* file1="targetfile.xsm";
-
 		printf("\nGenerating AST, inorderForm is \n");
 		inorderForm($2);
-	/*
+
+
+		char* file1="targetfile.xsm";
 		printf("\n\nCalling codegen \n");
 		FILE *fptr = fopen(file1,"w");
 		codeGenXsm($2, fptr);
@@ -187,7 +187,7 @@
 		ltlex();
 
 		fclose(ltin);
-	*/	
+		
 
 
 	}

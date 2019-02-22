@@ -32,7 +32,7 @@ typedef struct Gsymbol
 }Gsymbol; 
 
 Lsymbol* Llookup(char* name);
-void Linstall(char* name, int type, int appendToBeg);
+void Linstall(char* name, int type, int appendToBeg, int binding);
 
 Gsymbol* Glookup(char* name); // Returns a pointer to the symbol table entry for the variable, returns NULL otherwise.
 

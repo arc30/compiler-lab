@@ -12,11 +12,11 @@ enddecl
 int func2(int c, int a)
 {
     decl
-    int k,b;
+    int k,b,dd,fff;
     enddecl
 
     c=3;
-    return "hi";
+    return 7;
 }
 
 int aa()

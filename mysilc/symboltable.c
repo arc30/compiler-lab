@@ -17,6 +17,9 @@ paramStruct* paramTail = NULL;
 int nextBindingAddr = 4096;
 int funcLabel = 0;
 
+int nextLocalBinding = 0;
+int nextParamBinding = -3;
+
 void printSymbolTable()
 {
     Gsymbol*temp = head;
@@ -208,14 +211,14 @@ void GinstallVar(char* name, int type, int size, int colSize)
 }
 
 
-void Linstall(char* name, int type, int appendToBeg)
+void Linstall(char* name, int type, int appendToBeg, int binding)
 {
     endIfRedeclaredLocally(name);
     Lsymbol* newEntry = (Lsymbol*)malloc(sizeof(Lsymbol));
     newEntry->name = (char*)malloc(strlen(name)+1);
     strcpy(newEntry->name, name);
     newEntry->type = type;
-    newEntry->binding = 0;
+    newEntry->binding = binding;
 
     newEntry->next = NULL;
     if(LsymbolHead == NULL)
@@ -237,15 +240,16 @@ void Linstall(char* name, int type, int appendToBeg)
 
 void LinstallVar(char* name, int type)
 {
-    Linstall(name, type, 0);
+    Linstall(name, type, 0, ++nextLocalBinding);
 }
 
 void LinstallParameters(paramStruct* paramlist)
 {
     if(paramlist != NULL)
     {
+        
+        Linstall(paramlist->paramName, paramlist->paramType,1,nextParamBinding--); 
         LinstallParameters(paramlist->next);
-        Linstall(paramlist->paramName, paramlist->paramType,1);
        // paramlist = paramlist->next;
     }
 }
@@ -255,6 +259,8 @@ void freeLsymbolTable()
     //free the entire space?
     LsymbolHead = NULL;
     LsymbolTail = NULL;
+    nextLocalBinding = 0;
+    nextParamBinding = -3;
 }
 
 Lsymbol* Llookup(char* name)

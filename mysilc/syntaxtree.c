@@ -268,7 +268,6 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 
 	if(r->nodetype == FUNCCALL)
 	{
-		printf("rval of assgn is funccall\n"); 
 		//type check
 		checkTypeFuncCall(r);
 		
@@ -369,6 +368,7 @@ tnode* makeContinueNode(int nodetype)
 
 tnode* makeReturnNode(int nodetype, tnode* expr)
 {
+	// TODO TYPECHECK RETURN
 	return createTree(-1,expr->type, NULL, nodetype, NULL, NULL,expr, NULL);
 }
 
