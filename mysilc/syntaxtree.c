@@ -144,8 +144,7 @@ Convention is to make LEFT child always null
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-	//TODO TYPECHECK READ
-	//if(! checkType(-1,INTTYPE, -1,lr->type) )
+	// TYPECHECK READ
 	if(!checkType(-1, INTTYPE, NOTYPE, lr->type) && !checkType(-1, STRTYPE, NOTYPE, lr->type))
 		{
 			printf("\nType Error: Read Node \n"); exit(1);
@@ -156,8 +155,6 @@ struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
-		//TODO 
-		//HOW TO CHECK TYPE? CANT be done at static time no!!
 	if(lr->type==NOTYPE)
 	{
 		printf("\nType ERR: write node\n"); exit(1);
@@ -376,7 +373,7 @@ tnode* makeContinueNode(int nodetype)
 
 tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, int returnType)
 {
-	// TODO TYPECHECK RETURN
+	// TYPECHECK RETURN
 	if(!checkType(returnType,NOTYPE, expr->type ,NOTYPE))
 	{
 		printf("Type Error: Return Node\n"); exit(1);

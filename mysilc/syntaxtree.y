@@ -198,22 +198,16 @@
 	MainBlock	: INT MAIN '(' ')' '{' LDeclBlock codeSection '}'
 					{
 					$$ = makeMainNode(MAIN,$7 );
-					freeLsymbolTable();	
 					
 					printf("\nLsymbol Table of Main\n");
 					printLocalSymbolTable();
-					
+					freeLsymbolTable();						
 					}
 				;
 
 	codeSection : BEG Body END 
 	{		
-
-//		printf("\nGenerating AST of Main, inorderForm is \n");
-//		inorderForm($2);
-
 		$$ = $2;
-
 	}
 	|	BEG END {printf("No statements\n"); $$=NULL; }	
 	;
