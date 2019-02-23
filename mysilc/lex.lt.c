@@ -421,7 +421,7 @@ static yyconst YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
 
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    5,    1,    1,    1,    1,    1,    1,    5,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -721,7 +721,7 @@ YY_DECL
 		}
 
 	{
-#line 24 "labeltrans.l"
+#line 25 "labeltrans.l"
 
 
 #line 728 "lex.lt.c"
@@ -784,7 +784,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 26 "labeltrans.l"
+#line 27 "labeltrans.l"
 {
             if(pass==1)
                 lineNumber++;
@@ -796,7 +796,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 34 "labeltrans.l"
+#line 35 "labeltrans.l"
 {   if(pass == 1)
                     { 
                         char* string = malloc(ltleng);
@@ -814,7 +814,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 49 "labeltrans.l"
+#line 50 "labeltrans.l"
 {
                 if(pass == 2)
                 {
@@ -824,7 +824,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 57 "labeltrans.l"
+#line 58 "labeltrans.l"
 {   if(pass == 1)
             {
                 ;
@@ -838,7 +838,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 67 "labeltrans.l"
+#line 68 "labeltrans.l"
 ECHO;
 	YY_BREAK
 #line 845 "lex.lt.c"
@@ -1842,7 +1842,7 @@ void ltfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 67 "labeltrans.l"
+#line 68 "labeltrans.l"
 
 
 

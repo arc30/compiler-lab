@@ -32,7 +32,7 @@
 	
 	%token OPERATOR NUM ID END BEG CONNECTOR READ WRITE FUNC FUNCCALL
 	%token IF THEN ELSE ENDIF WHILE DO ENDWHILE IFELSE ASSGN BREAK CONTINUE RETURN
-	%token REPEAT UNTIL
+	%token REPEAT UNTIL MAIN
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
 
@@ -45,16 +45,41 @@
 	%right ADDROF
 %%
 	
+	start : program
+			{
+			printf("\nGenerating AST of program, inorderForm is \n");	
+			inorderForm($1);
+			printf("\n\n");
+//codegen
+			char* file1="targetfile.xsm";
+			printf("\n\nCalling codegen \n");
+			FILE *fptr = fopen(file1,"w");
+			codeGenXsm($1, fptr);
+			printf("Finished CodeGen\n");
+
+			fclose(fptr); //IMP
+
+			ltin = fopen(file1,"r");
+			ltlex();
+
+			fclose(ltin);
+
+//codegen call end
+			}
 	
-	
-	program : GDeclBlock FDefBlock codeSection 
-				{	
-					printf("\nGenerating AST for FDef, inorderForm is \n");
-					inorderForm($2);		
-			
+	program : GDeclBlock FDefBlock MainBlock 
+				{			
+					$$ = makeConnectorNode(CONNECTOR,$2, $3); //the full program
+
 				}		
-			| GDeclBlock codeSection {printf("\n gdecl code\n");}
-			| codeSection	{printf("\ncode\n");}
+			| GDeclBlock MainBlock { 
+									$$ = $2;  
+									printf("\n gdecl code\n");
+									}
+			| MainBlock	{
+						$$=$1;
+						printf("\ncode\n");
+						}
 		   ;
 
 	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
@@ -128,11 +153,14 @@
 			  | FDef		{ $$=$1; }
 			  ;
 	
-	FDef	  : type ID '(' paramlist ')' '{' LDeclBlock Body '}'
+	FDef	  : type fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
 				{
 					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
 
+					
 					$$ = makeFuncdefNode(FUNC,$2->varname,$1->type,$2,$8);
+
+	//check if there's a return type? TODO>?
 
 					printf("\nLsymbol Table of %s\n", $2->varname);
 					printLocalSymbolTable();
@@ -167,31 +195,27 @@
 				;
 
 
+	MainBlock	: INT MAIN '(' ')' '{' LDeclBlock codeSection '}'
+					{
+					$$ = makeMainNode(MAIN,$7 );
+					freeLsymbolTable();	
+					
+					printf("\nLsymbol Table of Main\n");
+					printLocalSymbolTable();
+					
+					}
+				;
 
 	codeSection : BEG Body END 
 	{		
 
-		printf("\nGenerating AST, inorderForm is \n");
-		inorderForm($2);
+//		printf("\nGenerating AST of Main, inorderForm is \n");
+//		inorderForm($2);
 
-
-		char* file1="targetfile.xsm";
-		printf("\n\nCalling codegen \n");
-		FILE *fptr = fopen(file1,"w");
-		codeGenXsm($2, fptr);
-		printf("Finished CodeGen\n");
-
-		fclose(fptr); //IMP
-
-		ltin = fopen(file1,"r");
-		ltlex();
-
-		fclose(ltin);
-		
-
+		$$ = $2;
 
 	}
-	|	BEG END {printf("No statements\n");  }	
+	|	BEG END {printf("No statements\n"); $$=NULL; }	
 	;
 
 
@@ -267,7 +291,10 @@
 				}
 			;
 
-	returnstmt : RETURN expr ';'	{ $$ = makeReturnNode(RETURN, $2);	}
+	returnstmt : RETURN expr ';'	{ 
+									//BAD CODE? HOW TO SOLVE THIS?
+									$$ = makeReturnNode(RETURN, $2, fetchLsymbolHead(), returnType);	
+									}
 			   ;
 
 	expr : expr PLUS expr 

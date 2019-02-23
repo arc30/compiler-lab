@@ -61,7 +61,7 @@ void inorderForm(struct tnode* t);
 
 tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r);
 
-tnode* makeReturnNode(int nodetype, tnode* expr);
+tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, int returnType);
 
 
 

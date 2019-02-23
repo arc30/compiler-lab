@@ -115,7 +115,7 @@ tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )
 	{
 		type = temp->type;
 	}
-	return createTreeWithArglist(-1, type, c, nodetype, arglist, NULL, NULL, NULL, NULL, NULL);
+	return createTreeWithArglist(-1, type, c, nodetype, arglist, temp, NULL, NULL, NULL, NULL);
 }
 
 tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
@@ -123,6 +123,13 @@ tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
 	Lsymbol* lHead = fetchLsymbolHead();
 
 	return createTreeWithLenty(-1,type,ch,nodetype,l->gEntry,lHead,l,r,NULL);
+}
+
+tnode* makeMainNode(int nodetype, tnode* body)
+{
+	Lsymbol* lHead = fetchLsymbolHead();
+	return createTreeWithLenty(-1,INT,NULL,nodetype,NULL,lHead,NULL,body,NULL);
+
 }
 
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
@@ -181,7 +188,7 @@ struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 		type = temp->type;
 	}
 
-	return createTree(-1,type,ch,nodetype,temp,NULL,NULL,NULL);
+	return createTreeWithLenty(-1,type,ch,nodetype,temp,Ltemp,NULL,NULL,NULL);
 }
 
 
@@ -199,6 +206,7 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 {
 	char *name = l->varname;
 	Gsymbol* temp = Glookup(name);
+	Lsymbol* Ltemp = Llookup(name);
 	
 	int type = NOTYPE;
 
@@ -213,7 +221,7 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 		}
 		
 	}
-	return createTree(-1,type,name,nodetype,temp,l,r,NULL);
+	return createTreeWithLenty(-1,type,name,nodetype,temp,Ltemp,l,r,NULL);
 }
 
 tnode* make2DArrayNode(int nodetype, tnode* l, tnode* r1, tnode* r2)
@@ -366,10 +374,14 @@ tnode* makeContinueNode(int nodetype)
 	return createTree(-1,NOTYPE,NULL,nodetype, NULL, NULL,NULL,NULL);
 }
 
-tnode* makeReturnNode(int nodetype, tnode* expr)
+tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, int returnType)
 {
 	// TODO TYPECHECK RETURN
-	return createTree(-1,expr->type, NULL, nodetype, NULL, NULL,expr, NULL);
+	if(!checkType(returnType,NOTYPE, expr->type ,NOTYPE))
+	{
+		printf("Type Error: Return Node\n"); exit(1);
+	}
+	return createTreeWithLenty(-1,expr->type, NULL, nodetype, NULL, lentry, NULL,expr, NULL);
 }
 
 void printValue(struct tnode *t)
@@ -465,6 +477,9 @@ void printValue(struct tnode *t)
 			break;
 		case FUNC:
 			printf("{} ");
+			break;
+		case MAIN:
+			printf("main {} ");
 			break;
 		case FUNCCALL:
 			printf("%s( ", t->varname);

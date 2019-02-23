@@ -80,9 +80,11 @@ void endIfUndeclared(char* ch, Gsymbol* temp)
 }
 
 //returns stackPos for variable
-int getVarPos(FILE* target_file, char* ch)
+
+//TODO LLOOKUP!!!!!!!!!!!!!!!
+
+int getVarPos(FILE* target_file, char* ch, Lsymbol* Ltemp) 
 {
-	Lsymbol* Ltemp = Llookup(ch);
 	int reg0 = getReg();
 	if(Ltemp!=NULL)
 	{
@@ -185,7 +187,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == ID)
 	{
 		
-		int reg1 = getVarPos(target_file, t->varname);	//returns a reg. binding of ID from symbol table
+		int reg1 = getVarPos(target_file, t->varname, t->lEntry);	//returns a reg. binding of ID from symbol table
 
 		fprintf(target_file, "MOV R%d, [R%d]\n", reg1, reg1);
 		return reg1;
@@ -193,7 +195,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 	else if(t->nodetype == ARR)
 	{
-		int reg0 = getVarPos(target_file, t->varname); //base address reg
+		int reg0 = getVarPos(target_file, t->varname, t->lEntry); //base address reg
 
 		int reg1 = codeGen(t->right, target_file);
 		fprintf(target_file, "ADD R%d, R%d\n", reg1, reg0);	//reg1 has address
@@ -219,7 +221,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		char* varname = t->right->varname;
 		pushAllRegisters(target_file);		
 
-		int varPos = getVarPos(target_file, varname);	//reg : base addr of variable
+		int varPos = getVarPos(target_file, varname, t->right->lEntry);	//reg : base addr of variable
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, \"Read\"\n", reg0);		
 		fprintf(target_file, "PUSH R%d \n", reg0);  	
@@ -294,7 +296,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 	else if(t->nodetype == ASSGN)
 	{
 		char* varname = t->left->varname;
-		int varPos = getVarPos(target_file, varname);
+		int varPos = getVarPos(target_file, varname, t->left->lEntry);
 		int reg1 = codeGen(t->right, target_file);
 		if(t->left->nodetype == ID)
 		{
@@ -439,7 +441,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 	}
 	else if(t->nodetype == ADDROF)
 	{
-		int reg0 = getVarPos(target_file, t->right->varname);
+		int reg0 = getVarPos(target_file, t->right->varname, t->right->lEntry);
 		return reg0;
 	}
 	// funCall, funcDef, returnstmt
@@ -481,9 +483,30 @@ int codeGen(struct tnode* t, FILE* target_file)
 		return retVal;
 
 	}
+	else if(t->nodetype == MAIN)
+	{
+		fprintf(target_file, "m0:\n");
+//setting SP to its right pos. ie after all glob decl. needed yeah?
+		fprintf(target_file, "BRKP\n");
+		fprintf(target_file, "MOV SP, %d\n", nextBindingAddr-1);	
+
+
+		//set BP to SP
+		fprintf(target_file, "MOV BP, SP\n");
+
+		//push space for local vars
+		int localVarCount = getLocalVarCount(t->lEntry, NULL ); //TODO CREATE LSYMBOL ENTRY FOR MAIN
+		fprintf(target_file, "ADD SP, %d\n", localVarCount);
+
+		codeGen(t->right, target_file);
+		return -1;
+
+	}
 
 	else if (t->nodetype == FUNC)	//for DEFn 
 	{
+		//place func label
+		fprintf(target_file, "f%d:\n",t->gEntry->flabel);
 		//save BP
 		fprintf(target_file, "PUSH BP\n");
 		//set BP to SP
@@ -494,16 +517,28 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "ADD SP, %d\n", localVarCount);
 
 		codeGen(t->right, target_file);
-		//Set BP+binding as proper addr 
-
-		//hmm...get from lsymboltable. but it has parameters. binding how> 1,2...?
+		return -1;
 
 	}
 	
 	else if (t->nodetype == RETURN)
 	{
 		//pop out local vars
+		int localVarCount = getLocalVarCount(t->lEntry, fetchParamHead() );
+		fprintf(target_file, "SUB SP, %d\n", localVarCount);
 
+		//calc return expr
+		int reg0 = codeGen(t->right, target_file);
+		//place in [BP-2]
+		fprintf(target_file, "SUB BP, 2\n");
+		fprintf(target_file, "MOV [BP], R%d\n",reg0);
+		freeReg();
+
+		//set BP to old value of BP
+		fprintf(target_file, "POP BP\n");
+		fprintf(target_file, "RET\n");
+
+		return -1;
 	}
 	
 	// stg5
@@ -573,9 +608,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 
 void codeGenXsm(struct tnode* t, FILE* target_file)
 {
-	fprintf(target_file, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",0,2056,0,0,0,0,0,0); 
-	fprintf(target_file, "BRKP\n");
-	fprintf(target_file, "MOV SP, %d\n", nextBindingAddr);	
+	fprintf(target_file, "%d\n%s\n%d\n%d\n%d\n%d\n%d\n%d\n",0,"m0",0,0,0,0,0,0); 
 	
 
 	int result = codeGen(t, target_file);

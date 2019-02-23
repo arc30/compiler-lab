@@ -57,6 +57,7 @@
 "enddecl"	{return ENDDECL;}
 "int"		{return INT;}
 "str"		{return STR;}
+"main"		{return MAIN;}
 
 
 ["][^"]*["]	{
@@ -66,7 +67,7 @@
 	
 			return STRCONST;}
 
-[_a-z][a-z_0-9]*	{varname = (char*) malloc(yyleng+1);
+[_a-zA-Z][A-Za-z_0-9]*	{varname = (char*) malloc(yyleng+1);
 		strncpy(varname, yytext, yyleng);
 		yylval = makeLeafNodeVar(ID, varname);	
 		return ID;}
