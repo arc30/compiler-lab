@@ -81,8 +81,6 @@ void endIfUndeclared(char* ch, Gsymbol* temp)
 
 //returns stackPos for variable
 
-//TODO LLOOKUP!!!!!!!!!!!!!!!
-
 int getVarPos(FILE* target_file, char* ch, Lsymbol* Ltemp) 
 {
 	int reg0 = getReg();
@@ -495,7 +493,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "MOV BP, SP\n");
 
 		//push space for local vars
-		int localVarCount = getLocalVarCount(t->lEntry, NULL ); //TODO CREATE LSYMBOL ENTRY FOR MAIN
+		int localVarCount = getLocalVarCount(t->lEntry, NULL ); 
 		fprintf(target_file, "ADD SP, %d\n", localVarCount);
 
 		codeGen(t->right, target_file);
