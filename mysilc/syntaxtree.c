@@ -62,7 +62,7 @@ int checkType(Typetable* type1, Typetable* type2)
 
 	if(strcmp(type1->name,type2->name) != 0)
 	{
-		printf("Type mismatch detected\n"); return 0;
+		return 0;
 	}
 	return 1;
 }
@@ -254,7 +254,7 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 	if(l->nodetype == ID || l->nodetype == ARR )
 	{
 
-		if( !checkType(l->type, TLookup("void")))
+		if( checkType(l->type, TLookup("void")))
 		{
 			printf("Undeclared variable %s\n", l->varname); exit(1);
 		}
@@ -265,12 +265,9 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 				}
 		}
 
-		if(!(checkType(TLookup("int"), l->type) && checkType(TLookup("int"), r->type)))
-		{
-			if(!(checkType(TLookup("str"), l->type) && checkType(TLookup("str"), r->type)))
-			{	
-				printf("Type Error: Assignment Node:"); exit(1);
-			}
+		if(!checkType(r->type, l->type))
+		{				
+			printf("Type Error: Assignment Node:"); exit(1);
 		}
 	}
 
