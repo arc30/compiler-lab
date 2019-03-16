@@ -27,6 +27,5 @@ decl
 			read(n);
 			result = fibo(n);
 			write(result);
-			return 0;
 		end
 	}

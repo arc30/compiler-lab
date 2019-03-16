@@ -54,7 +54,7 @@
 			inorderForm($1);
 			printf("\n\n");
 //codegen
-/*			char* file1="targetfile.xsm";
+			char* file1="targetfile.xsm";
 			printf("\n\nCalling codegen \n");
 			FILE *fptr = fopen(file1,"w");
 			codeGenXsm($1, fptr);
@@ -66,7 +66,7 @@
 			ltlex();
 
 			fclose(ltin);
-*/
+
 //codegen call end
 			}
 	
