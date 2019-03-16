@@ -6,7 +6,7 @@
 #include "symboltable.h"
 
 
-tnode* createTreeWithArglist(int val, int type, char* c, int nodetype, tnode* argslist, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr)
+tnode* createTreeWithArglist(int val, Typetable* type, char* c, int nodetype, tnode* argslist, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr)
 {
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
@@ -32,13 +32,13 @@ tnode* createTreeWithArglist(int val, int type, char* c, int nodetype, tnode* ar
 	temp->extraRight = elseptr;
 }
 
-struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+struct tnode* createTreeWithLenty(int val, Typetable* type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
 
 	return createTreeWithArglist(val, type, c, nodetype, NULL, gEntry, lEntry, l, r, elseptr);
 }
 
-tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
+tnode* createTree(int val, Typetable* type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr )
 {
 	//add lEntry if exists and if nodetype is ID 
 	
@@ -53,18 +53,24 @@ tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, str
 }
 
 
-int checkType(int expectedOperand1Type, int expectedOperand2Type, int operand1type, int operand2type)
+int checkType(Typetable* type1, Typetable* type2)
 {
-	if (operand1type != expectedOperand1Type || operand2type != expectedOperand2Type)
+	if(type1==NULL || type2==NULL)
 	{
-		return 0;
+		printf("Error ! NULL passed to checkType.\n "); return 0;
+	}
+
+	if(strcmp(type1->name,type2->name) != 0)
+	{
+		printf("Type mismatch detected\n"); return 0;
 	}
 	return 1;
 }
 
-void checkTypeIfElse(int guardType, int thenType, int elseType )
+
+void checkTypeIfElse(Typetable* guardType, Typetable* thenType, Typetable* elseType )
 {
-	if(guardType != BOOLTYPE || thenType != NOTYPE || elseType!=NOTYPE)
+	if(!checkType(guardType,TLookup("bool")) || !checkType(thenType,TLookup("void")) || !checkType(elseType,TLookup("void")))
 	{
 		printf("Error: Type mismatch ifElseThen\n ");
 		exit(1);
@@ -76,7 +82,12 @@ void checkTypeIfElse(int guardType, int thenType, int elseType )
 void checkTypeFuncCall(tnode* funccall)
 {
 	Gsymbol* temp = Glookup(funccall->varname);
-	if(funccall->type != temp->type)
+
+	if(temp->type == NULL || funccall->type == NULL)
+	{
+		printf("Error ! NULL type in checkTypeFuncCall.\n "); exit(1);		
+	}
+	if(strcmp(funccall->type->name, temp->type->name)) 
 	{
 		printf("Ret Type Error func call %s\n", funccall->varname); exit(1);
 	}
@@ -102,14 +113,15 @@ void checkTypeFuncCall(tnode* funccall)
 
 }
 
-tnode* makeTypeNode(int type)
+tnode* makeTypeNode(char* typename)
 {
+	Typetable* type = TLookup(typename);
 	return createTree(-1,type,NULL,-1,NULL,NULL,NULL,NULL);
 }
 
 tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )
 {
-	int type = NOTYPE;
+	Typetable* type = TLookup("void");
 	Gsymbol* temp = Glookup(c);
 	if(temp!=NULL)
 	{
@@ -118,7 +130,7 @@ tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )
 	return createTreeWithArglist(-1, type, c, nodetype, arglist, temp, NULL, NULL, NULL, NULL);
 }
 
-tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
+tnode* makeFuncdefNode(int nodetype, char* ch, Typetable* type, tnode*l, tnode* r)
 {
 	Lsymbol* lHead = fetchLsymbolHead();
 
@@ -128,14 +140,15 @@ tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r)
 tnode* makeMainNode(int nodetype, tnode* body)
 {
 	Lsymbol* lHead = fetchLsymbolHead();
-	return createTreeWithLenty(-1,INT,NULL,nodetype,NULL,lHead,NULL,body,NULL);
+	Typetable* type = TLookup("int");
+	return createTreeWithLenty(-1,type,NULL,nodetype,NULL,lHead,NULL,body,NULL);
 
 }
 
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	//checkType(NOTYPE,NOTYPE,-1, l->type, r->type, -1);
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r, NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,l,r, NULL);
 }
 
 /*read and write nodes have only one child. 
@@ -146,24 +159,26 @@ struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
 	//TODO TYPECHECK READ
 	//if(! checkType(-1,INTTYPE, -1,lr->type) )
-	if(!checkType(-1, INTTYPE, NOTYPE, lr->type) && !checkType(-1, STRTYPE, NOTYPE, lr->type))
+	if(!checkType(TLookup("int"), lr->type) && !checkType(TLookup("str"), lr->type))
 		{
 			printf("\nType Error: Read Node \n"); exit(1);
 		}
 	
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,lr,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,NULL,lr,NULL);
 }
 
 struct tnode* makeWriteNode(int nodetype, struct tnode* lr)
 {
 		//TODO 
 		//HOW TO CHECK TYPE? CANT be done at static time no!!
-	if(lr->type==NOTYPE)
+	if(!checkType(lr->type, TLookup("int")) && !checkType(lr->type, TLookup("str")))
 	{
 		printf("\nType ERR: write node\n"); exit(1);
 	}
 
-	return createTree(-1,-1,NULL,nodetype,NULL,NULL,lr,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,NULL,lr,NULL);
 }
 
 struct tnode* makeLeafNodeVar(int nodetype, char* ch)
@@ -176,7 +191,7 @@ struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 	//if lex encounters ID in program, and ID is undeclared, there wont be a gEntry.
 
 	//TODO catch Undeclared var later.
-	int type = NOTYPE;
+	Typetable* type = TLookup("void");
 
 	if(Ltemp != NULL)
 	{
@@ -194,12 +209,17 @@ struct tnode* makeLeafNodeVar(int nodetype, char* ch)
 
 struct tnode* makeLeafNodeNum(int nodetype, int n)
 {
-	return createTree(n,INTTYPE,NULL,nodetype,NULL,NULL,NULL,NULL);
+	return createTree(n,TLookup("int"),NULL,nodetype,NULL,NULL,NULL,NULL);
 }
 
 struct tnode* makeLeafNodeStringConst(int nodetype,char* ch)
 {
-	return createTree(-1, STRTYPE, ch, nodetype,NULL, NULL, NULL, NULL);
+	return createTree(-1, TLookup("str"), ch, nodetype,NULL, NULL, NULL, NULL);
+}
+
+tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r)
+{
+	return createTree(-1,TLookup("void"),l->varname,nodetype,NULL,l,r,NULL );
 }
 
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
@@ -208,14 +228,14 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 	Gsymbol* temp = Glookup(name);
 	Lsymbol* Ltemp = Llookup(name);
 	
-	int type = NOTYPE;
+	Typetable* type = TLookup("void");
 
 	if(temp!=NULL)
 	{
 		type = temp->type;
 		
 		//typecheck id[expr], expr should be of int
-		if(!checkType(INTTYPE, NOTYPE, r->type, NOTYPE))
+		if(!checkType(TLookup("int"), r->type))
 		{
 			printf("Type Error: Array Node : expr should evaluate to int\n"); exit(1);
 		}
@@ -224,36 +244,17 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 	return createTreeWithLenty(-1,type,name,nodetype,temp,Ltemp,l,r,NULL);
 }
 
-tnode* make2DArrayNode(int nodetype, tnode* l, tnode* r1, tnode* r2)
-{
-	char *name = l->varname;
-	Gsymbol* temp = Glookup(name);
-	
-	int type = NOTYPE;
 
-	if(temp!=NULL)
-	{
-		type = temp->type;
-		
-		//typecheck id[expr] [expr], both expr should be of int
-		if(!checkType(INTTYPE, INTTYPE, r1->type, r2->type))
-		{
-			printf("Type Error: 2DArray Node : expr should evaluate to int\n"); exit(1);
-		}
-		
-	}
-	return createTree(-1,type,name,nodetype,temp,l,r1,r2);
-}
 
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
 
 
-	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == ARR2D || l->nodetype == DEREF)
+	if(l->nodetype == ID || l->nodetype == ARR )
 	{
 
-		if(l->type==NOTYPE)
+		if( !checkType(l->type, TLookup("void")))
 		{
 			printf("Undeclared variable %s\n", l->varname); exit(1);
 		}
@@ -263,9 +264,13 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 					printf("Variable %s size doesnt match\n ", l->varname); exit(1);
 				}
 		}
-		if(!checkType(INTTYPE,INTTYPE, l->type,r->type) && !checkType(STRTYPE,STRTYPE, l->type,r->type) && !checkType(INTPTR,INTPTR, l->type,r->type) && !checkType(STRPTR,STRPTR, l->type,r->type)) 
+
+		if(!(checkType(TLookup("int"), l->type) && checkType(TLookup("int"), r->type)))
 		{
-			printf("Type Error: Assignment Node:"); exit(1);
+			if(!(checkType(TLookup("str"), l->type) && checkType(TLookup("str"), r->type)))
+			{	
+				printf("Type Error: Assignment Node:"); exit(1);
+			}
 		}
 	}
 
@@ -281,103 +286,74 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 		
 	}
 
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
 }
 	
-struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tnode *r)
+struct tnode* makeOperatorNode(int nodetype, Typetable* type,struct tnode *l,struct tnode *r)
 {
-	//For Unary Op
-	//left node is null
-	if(nodetype == DEREF)
-	{
-		if(!checkType(NOTYPE, INTPTR, NOTYPE, r->type) && !checkType(NOTYPE, STRPTR, NOTYPE, r->type))
-		{
-			printf("Type Error: Dereference Node not of type ptr\n"); exit(1);
-		}
-		if(type == INTPTR)
-		{
-			type = INTTYPE;
-		}
-		else if (type == STRPTR)
-		{
-			type= STRTYPE;
-		}
-		return createTree(-1,type,r->varname,nodetype,NULL,l,r,NULL);
-	}
 
-	else if(nodetype == ADDROF)
+//For Binary Op
+	if(!(checkType(TLookup("int"), l->type) && checkType(TLookup("int"), r->type)))
 	{
-		if(!checkType(NOTYPE, INTTYPE, NOTYPE, r->type) && !checkType(NOTYPE, STRTYPE, NOTYPE, r->type))
-		{
-			printf("Type Error: AddrOf Node not of type int/str\n"); exit(1);
-		}
-		if(type == INTTYPE)
-		{
-			type = INTPTR;
-		}
-		else if (type == STRTYPE)
-		{
-			type= STRPTR;
-		}
-
-		return createTree(-1,type,r->varname,nodetype,NULL,l,r,NULL);
+		printf("Type Error: Operator Node\n"); exit(1);
 	}
-   else
-   {
-	//For Binary Op
-		if(!checkType(INTTYPE, INTTYPE, l->type, r->type))
-		{
-			printf("Type Error: Operator Node\n"); exit(1);
-		}
-		return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
-	}
+	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
+	
 }
 
 struct tnode* makeIfThenElseNode(int nodetype,struct tnode* l, struct tnode* r, struct tnode* elseptr)
 {
 	checkTypeIfElse(l->type, r->type, elseptr->type);
-	return createTree(-1, NOTYPE, NULL, nodetype, NULL, l, r, elseptr);	
+	Typetable* type = TLookup("void");
+	return createTree(-1, type, NULL, nodetype, NULL, l, r, elseptr);	
 }
 
 struct tnode* makeIfThenNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	checkTypeIfElse(l->type, r->type, NOTYPE);
+	Typetable* type = TLookup("void");
+	checkTypeIfElse(l->type, r->type, type );
 
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r,NULL);
+	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
 }	
 
 struct tnode* makeWhileNode(int nodetype, struct tnode* l, struct tnode* r)
 {
-	if(!checkType(BOOLTYPE,NOTYPE, l->type,r->type))
+	if(!checkType(TLookup("bool"),l->type) || !checkType(TLookup("void"),r->type))
 	{
 		printf("Type Error: While Node\n"); exit(1);
 	}
-	return createTree(-1, NOTYPE, NULL, nodetype, NULL, l, r, NULL);
+
+	Typetable* type = TLookup("void");
+	return createTree(-1, type, NULL, nodetype, NULL, l, r, NULL);
 }	
 
 tnode* makeRepeatNode(int nodetype, tnode* l, tnode* r)	//repeat-until. left is slist, right is expr
 {
-	if(!checkType(NOTYPE,BOOLTYPE, l->type,r->type))
+	if(!checkType(TLookup("bool"),r->type) || !checkType(TLookup("void"),l->type))
 	{
 		printf("Type Error: RepeatUntil Node\n"); exit(1);
 	}
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,l,r,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
 }
 
 tnode* makeBreakNode(int nodetype)
 {
-	return createTree(-1,NOTYPE,NULL,nodetype,NULL,NULL,NULL,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype,NULL,NULL,NULL,NULL);
 }
 
 tnode* makeContinueNode(int nodetype)
 {
-	return createTree(-1,NOTYPE,NULL,nodetype, NULL, NULL,NULL,NULL);
+	Typetable* type = TLookup("void");
+	return createTree(-1,type,NULL,nodetype, NULL, NULL,NULL,NULL);
 }
 
-tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, int returnType)
+tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, Typetable* returnType)
 {
 	// TODO TYPECHECK RETURN
-	if(!checkType(returnType,NOTYPE, expr->type ,NOTYPE))
+	if(!checkType(returnType, expr->type ))
 	{
 		printf("Type Error: Return Node\n"); exit(1);
 	}
@@ -416,7 +392,7 @@ void printValue(struct tnode *t)
 			printf("/ ");
 			break;
 		case MOD:
-			printf("% ");
+			printf("modulo ");
 			break;
 		case ASSGN:
 			printf("= ");

@@ -9,6 +9,7 @@
 
 	#include "funcdef.h" 
 	#include "syntaxtree.h"
+	#include "typetable.h"
 
 	#include "symboltable.h"
 	
@@ -21,10 +22,11 @@
 	extern FILE *ltin;
 	
 
-	int currType = NOTYPE;
-	int returnType = NOTYPE;
+	Typetable* currType;
+	Typetable* returnType;
 
-	
+	void yyerror(char const *s);
+
 	
 %}
 
@@ -35,6 +37,7 @@
 	%token REPEAT UNTIL MAIN
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
+	%token TYPE ENDTYPE FIELDDECL
 
 	%token INTPTR STRPTR
 
@@ -51,7 +54,7 @@
 			inorderForm($1);
 			printf("\n\n");
 //codegen
-			char* file1="targetfile.xsm";
+/*			char* file1="targetfile.xsm";
 			printf("\n\nCalling codegen \n");
 			FILE *fptr = fopen(file1,"w");
 			codeGenXsm($1, fptr);
@@ -63,11 +66,11 @@
 			ltlex();
 
 			fclose(ltin);
-
+*/
 //codegen call end
 			}
 	
-	program : GDeclBlock FDefBlock MainBlock 
+	program :  GDeclBlock FDefBlock MainBlock 
 				{			
 					$$ = makeConnectorNode(CONNECTOR,$2, $3); //the full program
 
@@ -82,6 +85,44 @@
 						}
 		   ;
 
+	TypeDefBlock : %empty
+				 | TYPE TypeDefList ENDTYPE 
+											
+				 ;							
+
+	TypeDefList	: TypeDefList TypeDef
+				| TypeDef
+				;
+
+	TypeDef		: ID '{' FieldDeclList '}'
+				{
+					Tinstall($1, $3);
+				}
+				;
+
+	FieldDeclList :	FieldDeclList FieldDecl { $$=makeConnectorNode(CONNECTOR,$1,$2);}
+				  | FieldDecl { $$=$1;}
+				  ;
+
+	FieldDecl	: TypeName ID ';'	{ $$=makeFieldDeclNode(FIELDDECL,$1,$2->varname);
+									 }
+				;
+
+	TypeName	: INT	{
+							currType = TLookup("int");
+							$$=makeTypeNode("int");
+						}
+				| STR	{
+							currType = TLookup("str");
+							$$=makeTypeNode("str");
+						}
+				| ID	{
+							currType = TLookup($1->varname);
+							$$=makeTypeNode($1->varname);
+						}
+				;
+
+
 	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
 											printSymbolTable();	
 											}
@@ -92,18 +133,9 @@
 			|Gdeclr							{}
 			;
 
-	Gdeclr	:  type varlist ';'				{}
+	Gdeclr	:  TypeName varlist ';'				{}
 			;
 
-	type	: INT						{ 
-											currType = INTTYPE; 
-											$$ = makeTypeNode(INTTYPE);
-										}
-			| STR						{   
-											 currType = STRTYPE; 
-											 $$ = makeTypeNode(STRTYPE);
-										}
-			;
 
 	varlist : varlist ',' var				
 			| var					
@@ -121,10 +153,7 @@
 			| ID '[' NUM ']'			{
 										 GinstallVar($1->varname, currType, $3->val, 0);
 										}
-			| ID '[' NUM ']' '[' NUM ']'{
-										GinstallVar($1->varname, currType, ($3->val)*($6->val), $6->val);
-										}
-
+			
 			| fname '(' paramlist ')'		{
 											//Ginstall function in gsymboltable
 											
@@ -144,7 +173,7 @@
 			  | param	{}
 			  ;
 	
-	param : type ID		{   
+	param : TypeName ID		{   
 							appendParamNode($2->varname,$1->type);	
 						}
 		  ;
@@ -153,14 +182,13 @@
 			  | FDef		{ $$=$1; }
 			  ;
 	
-	FDef	  : type fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
+	FDef	  : TypeName fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
 				{
 					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
 
 					
 					$$ = makeFuncdefNode(FUNC,$2->varname,$1->type,$2,$8);
 
-	//check if there's a return type? TODO>?
 
 					printf("\nLsymbol Table of %s\n", $2->varname);
 					printLocalSymbolTable();
@@ -184,7 +212,7 @@
 			   | LDecl
 			   ;
 
-	LDecl		: type IDList ';'
+	LDecl		: TypeName IDList ';'
 				{
 				
 				}
@@ -241,7 +269,7 @@
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
 			  | READ '(' ID '[' expr ']' ')' ';' { $$ = makeReadNode(READ, makeArrayNode(ARR,$3,$5)); }
-			  | READ '(' ID '[' expr ']' '[' expr ']' ')' ';' { $$ = makeReadNode(READ, make2DArrayNode(ARR2D,$3,$5, $8)); }
+			  ;	
 
 	outputstmt : WRITE '(' expr ')' ';' {$$ = makeWriteNode(WRITE, $3);}
 		
@@ -250,9 +278,7 @@
 			  | ID '[' expr ']' ASSGN expr ';'	
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', makeArrayNode(ARR,$1,$3), $6);	}
 
-			  | ID '[' expr ']' '[' expr ']' ASSGN expr ';'
-			  	{ $$ = makeAssignmentNode(ASSGN,'=', make2DArrayNode(ARR2D,$1,$3, $6), $9); }
-
+			
 			 
 			  ;	
 
@@ -293,29 +319,30 @@
 
 	returnstmt : RETURN expr ';'	{ 
 									//BAD CODE? HOW TO SOLVE THIS?
-									$$ = makeReturnNode(RETURN, $2, fetchLsymbolHead(), returnType);	
+									Lsymbol* lhead = fetchLsymbolHead();
+									$$ = makeReturnNode(RETURN, $2, lhead, returnType);	
 									}
 			   ;
 
 	expr : expr PLUS expr 
 			{
-				$$ = makeOperatorNode(PLUS,INTTYPE,$1,$3);
+				$$ = makeOperatorNode(PLUS,TLookup("int"),$1,$3);
 			}
 	| expr MINUS expr 
 			{
-				$$ = makeOperatorNode(MINUS, INTTYPE,$1,$3);
+				$$ = makeOperatorNode(MINUS, TLookup("int"),$1,$3);
 			}
 	| expr MUL expr 
 			{
-				$$ = makeOperatorNode(MUL,INTTYPE,$1,$3);
+				$$ = makeOperatorNode(MUL,TLookup("int"),$1,$3);
 			}
 	| expr DIV expr 
 			{
-				$$ = makeOperatorNode(DIV, INTTYPE,$1,$3);
+				$$ = makeOperatorNode(DIV, TLookup("int"),$1,$3);
 			}
 	| expr MOD expr
 			{
-				$$ = makeOperatorNode(MOD, INTTYPE, $1, $3);
+				$$ = makeOperatorNode(MOD, TLookup("int"), $1, $3);
 			}
 	| '(' expr ')' 
 			{
@@ -331,43 +358,40 @@
 		{
 			$$ = makeArrayNode(ARR, $1,$3);
 		}
-	| ID '[' expr ']' '[' expr ']'
-		{
-			$$ = make2DArrayNode(ARR2D, $1, $3, $6);
-		}
+	
 
 
 	| STRCONST {$$ = $1;}	
 
 	| expr GREATERTHAN expr
 		{
-			$$ = makeOperatorNode(GREATERTHAN, BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(GREATERTHAN, TLookup("bool"), $1, $3);
 
 		}
 
 	| expr LESSTHAN expr
 		{
-			$$ = makeOperatorNode(LESSTHAN, BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(LESSTHAN, TLookup("bool"), $1, $3);
 		}
 
 	| expr GREATERTHAN_EQUAL expr
 		{
-			$$ = makeOperatorNode(GREATERTHAN_EQUAL, BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(GREATERTHAN_EQUAL, TLookup("bool"), $1, $3);
 		}
 
 	| expr LESSTHAN_EQUAL expr
 		{
-			$$ = makeOperatorNode(LESSTHAN_EQUAL, BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(LESSTHAN_EQUAL, TLookup("bool"), $1, $3);
 		}
 
 	|expr EQUAL expr
 		{
-			$$ = makeOperatorNode(EQUAL, BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(EQUAL, TLookup("bool"), $1, $3);
 		}
 
 	|expr NOTEQUAL expr
 		{
-			$$ = makeOperatorNode(NOTEQUAL,BOOLTYPE, $1, $3);
+			$$ = makeOperatorNode(NOTEQUAL,TLookup("bool"), $1, $3);
 		}
 	| ID '(' ')'	{ $$ = makeFuncCallNode(FUNCCALL, $1->varname, NULL); }
 	| ID '(' exprlist ')'	{ $$ = makeFuncCallNode(FUNCCALL, $$->varname, $3); }
@@ -387,7 +411,7 @@
 	
 	%%
 	
-	yyerror(char const *s)
+void yyerror(char const *s)
 	{
 	printf("yyerror %s",s);
 	}
@@ -411,6 +435,10 @@ int main(int argc, char** argv)
 		return 0;
 		
 	}
+
+	typeTableCreate();
+	currType = TLookup("void");
+	returnType = TLookup("void");
 	yyparse();
 	return 0;
 }

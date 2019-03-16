@@ -11,4 +11,11 @@
 
 TO ASK SIR:
 1)way to avoid returnType?
+2) argslist inconsistency
 
+
+
+TODO
+1) Allow func(a,f(b));
+        by making use of elseptr?
+        

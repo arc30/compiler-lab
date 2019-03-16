@@ -26,23 +26,15 @@ void printSymbolTable()
     while(temp!=NULL)
     {
         puts(temp->name);
-        switch(temp->type)
+        if(temp->type)
         {
-            case INTTYPE:
-                printf("INT ");
-                break;
-            case STRTYPE:
-                printf("STR ");
-                break;
-            case INTPTR:
-                printf("INTPTR ");
-                break;
-            case STRPTR:
-                printf("STRPTR ");
-                break;
-            default: 
-                printf("Unknown type %d: ERR ",temp->type );
+           printf("%s ", temp->type->name);
         }
+        else
+        {
+            printf("Error in type is GSymbolTable\n"); exit(1);
+        }
+        
         printf("\n%d  %d \n", temp->size, temp->binding);
         printf("Func label: f%d\n",temp->flabel);
         printf("Parameters : ");
@@ -51,13 +43,14 @@ void printSymbolTable()
                 paramStruct* tempptr = temp->paramlist;
                 while(tempptr != NULL)
                 {
-                    if(tempptr->paramType == INTTYPE) 
-                        printf("INT ");
-                    else if(tempptr->paramType == STRTYPE)
-                        printf("STR ");
+                    if(tempptr->paramType!=NULL)
+                    {
+                        printf("%s ",tempptr->paramType->name); 
+                    }
                     else 
+                    {
                         printf("ERR TYPE");
-
+                    }
                     printf("%s ",tempptr->paramName);
                     tempptr = tempptr->next;
                 }
@@ -70,7 +63,7 @@ void printSymbolTable()
 }
 
 
-paramStruct* createParamNode(char* name, int type)
+paramStruct* createParamNode(char* name, Typetable* type)
 {
    paramStruct* newEntry = (paramStruct*)malloc(sizeof(paramStruct));
    if(newEntry == NULL)
@@ -84,7 +77,7 @@ paramStruct* createParamNode(char* name, int type)
     return newEntry;
 }
 
-void appendParamNode(char* name, int type)
+void appendParamNode(char* name, Typetable* type)
 {
     paramStruct* temp = createParamNode(name, type);
     if(paramHead == NULL)
@@ -111,8 +104,7 @@ Gsymbol* Glookup(char* name)
             }
         temp=temp->next;
     }
-  //  printf("ERROR : UNDECLARED VARIABLE %s", name);
-  //  exit(1);
+
     return NULL;
 }
 
@@ -161,7 +153,7 @@ Lsymbol* fetchLsymbolHead()
     return LsymbolHead;
 }
 
-void Ginstall(char* name, int type, int size, int colSize, int flabel, struct paramStruct* paramlist) // Creates a symbol table entry.
+void Ginstall(char* name, Typetable* type, int size, int colSize, int flabel, struct paramStruct* paramlist) // Creates a symbol table entry.
 {
     endIfRedeclared(name);    
 
@@ -200,18 +192,18 @@ void Ginstall(char* name, int type, int size, int colSize, int flabel, struct pa
 
 }
 
-void GinstallFunc(char* name, int type, paramStruct* paramlist)
+void GinstallFunc(char* name, Typetable* type, paramStruct* paramlist)
 {
     Ginstall(name,type,0,0,funcLabel,paramlist);
     funcLabel++;
 }
-void GinstallVar(char* name, int type, int size, int colSize)
+void GinstallVar(char* name, Typetable* type, int size, int colSize)
 {
     Ginstall(name,type,size,colSize,-1,NULL);
 }
 
 
-void Linstall(char* name, int type, int appendToBeg, int binding)
+void Linstall(char* name, struct Typetable* type, int appendToBeg, int binding)
 {
     endIfRedeclaredLocally(name);
     Lsymbol* newEntry = (Lsymbol*)malloc(sizeof(Lsymbol));
@@ -238,7 +230,7 @@ void Linstall(char* name, int type, int appendToBeg, int binding)
     }
 }
 
-void LinstallVar(char* name, int type)
+void LinstallVar(char* name, Typetable* type)
 {
     Linstall(name, type, 0, ++nextLocalBinding);
 }
@@ -250,7 +242,6 @@ void LinstallParameters(paramStruct* paramlist)
         
         Linstall(paramlist->paramName, paramlist->paramType,1,nextParamBinding--); 
         LinstallParameters(paramlist->next);
-       // paramlist = paramlist->next;
     }
 }
 
@@ -284,17 +275,15 @@ void printLocalSymbolTable()
     while(temp!=NULL)
     {
         puts(temp->name);
-        switch(temp->type)
+        if(temp->type)
         {
-            case INTTYPE:
-                printf("INT ");
-                break;
-            case STRTYPE:
-                printf("STR ");
-                break;
-            default: 
-                printf("Unknown type %d: ERR ",temp->type );
+            printf("%s ",temp->type->name);
         }
+        else
+        {
+                printf("ERRor in Type in LSymbolTable\n"); exit(1);
+        }
+        
         printf("\n %d \n",  temp->binding);
       
 

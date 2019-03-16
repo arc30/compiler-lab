@@ -8,6 +8,8 @@
 	int number;
 	char* varname;
 	char* constname;
+	void yyerror(char const *s);
+
 	
 %}
 	
@@ -34,6 +36,8 @@
 [();,{}] {return *yytext;}
 "begin" {return BEG;}
 "end"	{return END;}
+"type"	{return TYPE;}
+"endtype" {return ENDTYPE;}	
 "read" {return READ;}
 "Read" {return READ;}
 

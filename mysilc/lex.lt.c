@@ -502,8 +502,12 @@ char *lttext;
         struct node* next;
     }node;
     node* labelHead = NULL;
+
+    int getAddr(char* s);
+    void saveLabelAddr(char* s);
+
 	
-#line 507 "lex.lt.c"
+#line 511 "lex.lt.c"
 
 #define INITIAL 0
 
@@ -721,10 +725,10 @@ YY_DECL
 		}
 
 	{
-#line 25 "labeltrans.l"
+#line 29 "labeltrans.l"
 
 
-#line 728 "lex.lt.c"
+#line 732 "lex.lt.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -784,7 +788,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 27 "labeltrans.l"
+#line 31 "labeltrans.l"
 {
             if(pass==1)
                 lineNumber++;
@@ -796,7 +800,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 35 "labeltrans.l"
+#line 39 "labeltrans.l"
 {   if(pass == 1)
                     { 
                         char* string = malloc(ltleng);
@@ -814,7 +818,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 50 "labeltrans.l"
+#line 54 "labeltrans.l"
 {
                 if(pass == 2)
                 {
@@ -824,7 +828,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 58 "labeltrans.l"
+#line 62 "labeltrans.l"
 {   if(pass == 1)
             {
                 ;
@@ -838,10 +842,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 68 "labeltrans.l"
+#line 72 "labeltrans.l"
 ECHO;
 	YY_BREAK
-#line 845 "lex.lt.c"
+#line 849 "lex.lt.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1842,7 +1846,7 @@ void ltfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 68 "labeltrans.l"
+#line 72 "labeltrans.l"
 
 
 

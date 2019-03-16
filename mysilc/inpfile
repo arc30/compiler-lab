@@ -16,7 +16,7 @@ decl
 					res=fibo(n-1)+fibo(n-2);
 				endif;
 			endif;
-			return res;
+			return (res<1);
 		end
 	}
 	int main(){
