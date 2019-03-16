@@ -1,3 +1,4 @@
-break /home/archana/Acad/s8/compiler/mysilc/codegen.c:296
-break /home/archana/Acad/s8/compiler/mysilc/codegen.c:298
+break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:127
+break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:127
+break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:186
 

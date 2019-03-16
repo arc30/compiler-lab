@@ -42,7 +42,7 @@ void typeTableCreate()
     Typetable* newEntry1 = populateDefaultTypeEntry("str");
     newEntry->next = newEntry1;
 
-    newEntry = populateDefaultTypeEntry("boolean");
+    newEntry = populateDefaultTypeEntry("bool");
     newEntry1->next=newEntry;
 
     newEntry1 = populateDefaultTypeEntry("void");
