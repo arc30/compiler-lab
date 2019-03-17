@@ -54,7 +54,7 @@
 			inorderForm($1);
 			printf("\n\n");
 //codegen
-			char* file1="targetfile.xsm";
+/*			char* file1="targetfile.xsm";
 			printf("\n\nCalling codegen \n");
 			FILE *fptr = fopen(file1,"w");
 			codeGenXsm($1, fptr);
@@ -66,14 +66,13 @@
 			ltlex();
 
 			fclose(ltin);
-
+*/
 //codegen call end
 			}
 	
-	program :  GDeclBlock FDefBlock MainBlock 
+	program : TypeDefBlock GDeclBlock FDefBlock MainBlock 
 				{			
 					$$ = makeConnectorNode(CONNECTOR,$2, $3); //the full program
-
 				}		
 			| GDeclBlock MainBlock { 
 									$$ = $2;  
@@ -85,7 +84,7 @@
 						}
 		   ;
 
-	TypeDefBlock : %empty
+	TypeDefBlock : TYPE ENDTYPE	
 				 | TYPE TypeDefList ENDTYPE 
 											
 				 ;							
@@ -96,7 +95,7 @@
 
 	TypeDef		: ID '{' FieldDeclList '}'
 				{
-					Tinstall($1, $3);
+					TInstall($1, $3);
 				}
 				;
 
@@ -104,7 +103,7 @@
 				  | FieldDecl { $$=$1;}
 				  ;
 
-	FieldDecl	: TypeName ID ';'	{ $$=makeFieldDeclNode(FIELDDECL,$1,$2->varname);
+	FieldDecl	: TypeName ID ';'	{ $$=makeFieldDeclNode(FIELDDECL,$1,$2);
 									 }
 				;
 

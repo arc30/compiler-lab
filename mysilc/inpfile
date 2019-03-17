@@ -1,4 +1,19 @@
-decl
+type
+
+person
+{
+	int age;
+	str name;
+}
+
+marks
+{
+	int mark;
+}
+
+endtype
+
+	decl
 		int n,fibo(int n);
 	enddecl
 

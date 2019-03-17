@@ -77,6 +77,8 @@ void printValue(struct tnode *t);
 tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist );
 tnode* makeMainNode(int nodetype, tnode* body);
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r);
+tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r);
+
 
 
 

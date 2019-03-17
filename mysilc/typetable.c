@@ -9,6 +9,7 @@
 Typetable* TypeHead = NULL;
 Typetable* TypeTail = NULL;
 
+
 Typetable* populateDefaultTypeEntry(char* name )
 {
 
@@ -67,6 +68,20 @@ void endIfRedeclaredType(char* name)
 }
 
 
+void endIfRedeclaredField(char* name, Fieldlist* fieldhead)
+{
+    Fieldlist* temp = fieldhead;
+    while(temp)
+    {
+        if(strcmp(name, temp->name)==0)
+        {
+           printf("Multiple Declaration of Field\n");
+           exit(1);
+        }
+        temp=temp->next;
+    }
+}
+
 Typetable* TLookup(char* name)
 {
     Typetable* temp = TypeHead;
@@ -82,27 +97,79 @@ Typetable* TLookup(char* name)
     return NULL;    
 }
 
+//remove the global
 
-/*
-void TInstall(tnode* idnode, tnode* fieldtree)
+Fieldlist* insertInFieldList(Typetable* newTypeEntry,Fieldlist* fieldhead, char* typename,char* fieldname, tnode* typenode, int fieldindex)
 {
-    endIfRedeclaredType( idnode->varname );
+    endIfRedeclaredField(fieldname,fieldhead);
+    Fieldlist* newEntry = (Fieldlist*) malloc(sizeof(Fieldlist));
+    newEntry->name = malloc(sizeof(fieldname));
+    strcpy(newEntry->name, fieldname);
+    newEntry->next = NULL;
+    
+    if(typenode->type == NULL)  //either error OR recursive type
+    {
+        //if recursive type
+        if(strcmp(typenode->varname,typename)==0)
+        {
+            newEntry->type = newTypeEntry;
+        }
+        else
+        {
+            printf("Type Error: %s field \n", typename); exit(1);
+        } 
+    }
+    else
+    {
+        newEntry->type = typenode->type;
+    }
+    newEntry->fieldIndex = fieldindex;
+
+    if(fieldhead == NULL)
+    {
+        fieldhead = newEntry;
+        
+    }
+    else
+    {
+        newEntry->next = fieldhead;
+        fieldhead = newEntry;
+    }
+
+    return fieldhead;
+}
+
+void TInstall(void* idnod, void* fieldtre)
+{
+    tnode* idnode = (tnode*) idnod;
+    tnode* fieldtree = (tnode*) fieldtre;
+ //hack used above. wasnt able to include tnode* in typetable.h. USed void*   
+    endIfRedeclaredType(idnode->varname );
 
     Typetable* newEntry = (Typetable*)malloc(sizeof(Typetable));
     newEntry->name = malloc(sizeof(idnode->varname));
     strcpy(newEntry->name, idnode->varname);
 
+    Fieldlist* FieldHead = NULL;
+    int fieldindex = 0;
 
-    while(fieldtree !=NULL)
+    tnode* currNode = fieldtree;
+    while(1)
     {
-        if(fieldtree->nodetype == FIELDDECL)
+        if(currNode->nodetype == FIELDDECL)
         {
-            //make a fieldlist
+            FieldHead = insertInFieldList(newEntry,FieldHead,currNode->varname,currNode->right->varname,currNode->left,fieldindex++);
+            break;
+        }
+        else if(currNode->nodetype == CONNECTOR)
+        {
+            FieldHead= insertInFieldList(newEntry,FieldHead,currNode->right->varname,currNode->right->right->varname,currNode->right->left,fieldindex++);   
+            currNode = currNode->left;
         }
     }
 
-    newEntry->size = size;
-    newEntry->fields = Fields;
+    newEntry->size = fieldindex;
+    newEntry->fields = FieldHead;
     newEntry->next = NULL;
 
     if(TypeHead == NULL || TypeTail==NULL )
@@ -113,7 +180,5 @@ void TInstall(tnode* idnode, tnode* fieldtree)
     TypeTail->next = newEntry;
     TypeTail = newEntry;
 
-    //link field type, update field index...
 
 }
-*/

@@ -116,7 +116,7 @@ void checkTypeFuncCall(tnode* funccall)
 tnode* makeTypeNode(char* typename)
 {
 	Typetable* type = TLookup(typename);
-	return createTree(-1,type,NULL,-1,NULL,NULL,NULL,NULL);
+	return createTree(-1,type,typename,-1,NULL,NULL,NULL,NULL);
 }
 
 tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )

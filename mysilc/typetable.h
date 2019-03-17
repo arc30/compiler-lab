@@ -21,7 +21,7 @@ typedef struct Fieldlist
 
 
 Typetable* TLookup(char* name);
-//void TInstall(tnode* idnode, tnode* fieldtree);
+void TInstall(void* idnod, void* fieldtre);
 void typeTableCreate();
 
 
