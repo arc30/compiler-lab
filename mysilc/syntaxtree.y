@@ -72,7 +72,7 @@
 	
 	program : TypeDefBlock GDeclBlock FDefBlock MainBlock 
 				{			
-					$$ = makeConnectorNode(CONNECTOR,$2, $3); //the full program
+					$$ = makeConnectorNode(CONNECTOR,$3, $4); //the full program
 				}		
 			| GDeclBlock MainBlock { 
 									$$ = $2;  

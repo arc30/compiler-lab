@@ -32,7 +32,7 @@ void printSymbolTable()
         }
         else
         {
-            printf("Error in type is GSymbolTable\n"); exit(1);
+            printf("Type Error in GSymbolTable\n"); exit(1);
         }
         
         printf("\n%d  %d \n", temp->size, temp->binding);

@@ -15,6 +15,8 @@ endtype
 
 	decl
 		int n,fibo(int n);
+		person p1;
+		marks p2;
 	enddecl
 
 	int fibo(int n){
@@ -37,6 +39,7 @@ endtype
 	int main(){
 		decl
 			int result;
+			marks m3;
 		enddecl
 		begin
 			read(n);
