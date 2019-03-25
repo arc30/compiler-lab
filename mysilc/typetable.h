@@ -23,6 +23,7 @@ typedef struct Fieldlist
 Typetable* TLookup(char* name);
 void TInstall(void* idnod, void* fieldtre);
 void typeTableCreate();
+Fieldlist* FLookup(Typetable* type, char* name);
 
 
 

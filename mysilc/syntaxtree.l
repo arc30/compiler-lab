@@ -33,16 +33,14 @@
 [ \t\n] {}
 "["	{return *yytext;}
 "]"	{return *yytext;}
-[();,{}] {return *yytext;}
+[();,.{}] {return *yytext;}
 "begin" {return BEG;}
 "end"	{return END;}
 "type"	{return TYPE;}
 "endtype" {return ENDTYPE;}	
 "read" {return READ;}
-"Read" {return READ;}
-
+"null"	{return NULLCONST;}
 "write" {return WRITE;}
-"Write" {return WRITE;}
 
 "if"	{return IF;}
 "then"	{return THEN;}

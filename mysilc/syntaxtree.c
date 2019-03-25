@@ -222,6 +222,22 @@ tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r)
 	return createTree(-1,TLookup("void"),l->varname,nodetype,NULL,l,r,NULL );
 }
 
+tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
+{
+	Typetable* ftype = TLookup(l->type->name);
+	if(ftype==NULL)
+	{
+		printf("ERROR in field. typename not found\n"); exit(1);
+	}
+	Fieldlist* field = FLookup(ftype,r->varname);
+	if(field == NULL)
+	{
+		printf("ERROR in field. fieldname not found\n"); exit(1);
+	}
+
+	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
+}
+
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 {
 	char *name = l->varname;
@@ -245,13 +261,16 @@ tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 }
 
 
-
+tnode* makeNullNode(int nodetype)
+{
+	return createTree(-1,NULL,NULL,nodetype,NULL,NULL,NULL,NULL);
+}
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r)
 {
 
 
-	if(l->nodetype == ID || l->nodetype == ARR )
+	if(l->nodetype == ID || l->nodetype == ARR || l->nodetype == FIELD)
 	{
 
 		if( checkType(l->type, TLookup("void")))
@@ -264,10 +283,11 @@ struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct t
 					printf("Variable %s size doesnt match\n ", l->varname); exit(1);
 				}
 		}
-
-		if(!checkType(r->type, l->type))
-		{				
-			printf("Type Error: Assignment Node:"); exit(1);
+		
+		if(r->type != NULL)			
+		{
+			if(!checkType(r->type, l->type))
+			{printf("Type Error: Assignment Node:"); exit(1);}
 		}
 	}
 
@@ -439,9 +459,12 @@ void printValue(struct tnode *t)
 		case ARR:
 			printf("[] ");	
 			break;
-		case ARR2D:
-			printf("[][] ");
+		case FIELD:
+			printf(". ");
 			break;
+		case NULLCONST:
+			printf("null ");
+			break;	
 		case DEREF:
 			printf("* ");
 			break;

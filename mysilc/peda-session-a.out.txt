@@ -1,2 +1,2 @@
-break /home/archana/Acad/s8/compiler/mysilc/syntaxtree.y:74
+break typetable.c:104
 

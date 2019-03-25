@@ -1,15 +1,20 @@
 type
 
+marks
+{
+	int phymark;
+	int mathmark;
+}
+
 person
 {
 	int age;
 	str name;
+	marks mark;
+	person next;
 }
 
-marks
-{
-	int mark;
-}
+
 
 endtype
 
@@ -43,7 +48,8 @@ endtype
 		enddecl
 		begin
 			read(n);
-			result = fibo(n);
-			write(result);
+			p1.name = "ammu";
+			p1.age = 21;
+			p1.next = null;
 		end
 	}

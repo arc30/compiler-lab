@@ -10,6 +10,7 @@ Typetable* TypeHead = NULL;
 Typetable* TypeTail = NULL;
 
 
+
 Typetable* populateDefaultTypeEntry(char* name )
 {
 
@@ -116,7 +117,8 @@ Fieldlist* insertInFieldList(Typetable* newTypeEntry,Fieldlist* fieldhead, char*
         }
         else
         {
-            printf("Type Error: %s field \n", typename); exit(1);
+            printf("Type Error: %s field \n", typename); 
+            exit(1);
         } 
     }
     else
@@ -158,12 +160,12 @@ void TInstall(void* idnod, void* fieldtre)
     {
         if(currNode->nodetype == FIELDDECL)
         {
-            FieldHead = insertInFieldList(newEntry,FieldHead,currNode->varname,currNode->right->varname,currNode->left,fieldindex++);
+            FieldHead = insertInFieldList(newEntry,FieldHead,idnode->varname,currNode->right->varname,currNode->left,fieldindex++);
             break;
         }
         else if(currNode->nodetype == CONNECTOR)
         {
-            FieldHead= insertInFieldList(newEntry,FieldHead,currNode->right->varname,currNode->right->right->varname,currNode->right->left,fieldindex++);   
+            FieldHead= insertInFieldList(newEntry,FieldHead,idnode->varname,currNode->right->right->varname,currNode->right->left,fieldindex++);   
             currNode = currNode->left;
         }
     }
@@ -179,6 +181,18 @@ void TInstall(void* idnod, void* fieldtre)
 
     TypeTail->next = newEntry;
     TypeTail = newEntry;
+}
 
-
+Fieldlist* FLookup(Typetable* type, char* name)
+{
+    Fieldlist* ftemp = type->fields;
+    while(ftemp!=NULL)
+    {
+        if(strcmp(ftemp->name, name)==0)
+        {
+            return ftemp;
+        }
+        ftemp=ftemp->next;
+    }
+    return NULL;
 }

@@ -37,9 +37,9 @@
 	%token REPEAT UNTIL MAIN
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
-	%token TYPE ENDTYPE FIELDDECL
+	%token TYPE ENDTYPE FIELDDECL FIELD
 
-	%token INTPTR STRPTR
+	%token INTPTR STRPTR NULLCONST
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
@@ -277,7 +277,10 @@
 			  | ID '[' expr ']' ASSGN expr ';'	
 			  	{ $$ = makeAssignmentNode(ASSGN,'=', makeArrayNode(ARR,$1,$3), $6);	}
 
-			
+			  | field ASSGN expr ';'
+			  {
+				  $$ = makeAssignmentNode(ASSGN, '=',$1,$3 );
+			  }			
 			 
 			  ;	
 
@@ -323,6 +326,11 @@
 									}
 			   ;
 
+	field : ID '.'	ID			//TODO to be extended 
+		  {
+			  $$ = makeFieldNode(FIELD,$1,$3);
+		  }
+		  ;
 	expr : expr PLUS expr 
 			{
 				$$ = makeOperatorNode(PLUS,TLookup("int"),$1,$3);
@@ -357,8 +365,8 @@
 		{
 			$$ = makeArrayNode(ARR, $1,$3);
 		}
-	
-
+	| field { $$ = $1;}
+	|NULLCONST { $$ = makeNullNode(NULLCONST);}
 
 	| STRCONST {$$ = $1;}	
 
