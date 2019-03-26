@@ -38,6 +38,7 @@
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
 	%token TYPE ENDTYPE FIELDDECL FIELD
+	%token INITIALIZE ALLOC DEALLOC
 
 	%token INTPTR STRPTR NULLCONST
 
@@ -264,7 +265,24 @@
 		| breakstmt {$$=$1;}
 		| continuestmt	{$$=$1;}
 		| returnstmt	{$$ = $1;}
+		| freestmt		{$$ = $1;}
+		| allocstmt 	{$$ = $1;}
+		| initializestmt	{$$=$1;}
 	;
+
+	initializestmt : ID '=' INITIALIZE '(' ')'';'
+					{$$ = makeInitializeNode(INITIALIZE, $1);}
+					;
+	allocstmt : ID '='	ALLOC '('')' ';'
+				{
+					$$ = makeAllocNode(ALLOC, $1);
+				}
+
+	freestmt : DEALLOC '(' ID ')' ';'
+				{
+					$$=makeFreeNode(DEALLOC,$3);
+				}
+			;
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
 			  | READ '(' ID '[' expr ']' ')' ';' { $$ = makeReadNode(READ, makeArrayNode(ARR,$3,$5)); }

@@ -41,7 +41,9 @@
 "read" {return READ;}
 "null"	{return NULLCONST;}
 "write" {return WRITE;}
-
+"initialize"	{return INITIALIZE;}
+"dealloc"	{return DEALLOC;}
+"alloc"		{return ALLOC;}
 "if"	{return IF;}
 "then"	{return THEN;}
 "else"	{return ELSE;}

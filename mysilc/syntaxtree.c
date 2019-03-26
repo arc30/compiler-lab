@@ -238,6 +238,35 @@ tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 }
 
+makeFreeNode(int nodetype, tnode* r)
+{
+	//expr type should be int. an addr actually. 
+	if(checkType(TLookup("int"), r->type) || checkType(TLookup("str"), r->type) || checkType(TLookup("bool"), r->type) || checkType(TLookup("void"), r->type) )
+	{
+		printf("Type Error: invalid dealloc"); exit(1);
+	}
+	return createTree(-1,TLookup("void"),r->varname,nodetype,NULL,NULL,r,NULL);
+}
+
+makeInitializeNode(int nodetype, tnode* r)
+{
+	if(!checkType(TLookup("int"), r->type))
+	{
+		printf("Type Error: initialize"); exit(1);
+	}
+	return createTree(-1,TLookup("void"),r->varname,nodetype,NULL,NULL,r,NULL);
+}
+
+makeAllocNode(int nodetype, tnode* r)
+{
+	if(checkType(TLookup("int"), r->type) || checkType(TLookup("str"), r->type) || checkType(TLookup("bool"), r->type) || checkType(TLookup("void"), r->type) )
+	{
+		printf("Type Error: invalid alloc"); exit(1);
+	}
+	
+	return createTree(-1,TLookup("void"),r->varname,nodetype,NULL,NULL,r,NULL);
+}
+
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r)
 {
 	char *name = l->varname;

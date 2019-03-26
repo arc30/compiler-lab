@@ -70,18 +70,18 @@ SUB R1, R2
 MOV R2, "Heapset"
 MOV R1, [R1]
 EQ R1, R2
-JZ R1, addr_of_alloc
+JZ R1, 176
 MOV R0, 1024
 MOV R1, 2048
-l1: MOV R3, R0
+MOV R3, R0
 LT R3, R1
-JZ R3, init_end
+JZ R3, 162
 MOV R2, R0
 ADD R2, 8
 MOV [R0], R2
 ADD R0, 8
-JMP l1:
-init_end: MOV R1, -1
+JMP 146
+MOV R1, -1
 MOV [2040], R1
 MOV R2, SP
 MOV R3, 1
@@ -89,35 +89,29 @@ SUB R2, R3
 MOV [R2],0
 RET
 
-addr_of_alloc
 MOV R1, SP
 MOV R2, 5
 SUB R1, R2  
 MOV R2, "Alloc"
 MOV R1, [R1]
 EQ R1, R2
-JZ R1, addr_of_free
-
+JZ R1, 238
 MOV R0, SP
 MOV R1, 4
 SUB R0, R1
 MOV R0, [R0]
 MOV R1, 8
-LT R0, R1
-JZ R0, alloc_fail
-
+LE R0, R1
+JZ R0, 212
 MOV R0, [1024]
 MOV R1, -1
 EQ R0, R1
-JZ R0, not_ful:
-alloc_fail:
+JZ R0, 224
 MOV R1, 1
 MOV R2, SP
 SUB R2, R1
 MOV [R2], -1
 RET
-
-not_ful:
 MOV R0, [1024]
 MOV R1, [R0]
 MOV [1024], R1
@@ -127,19 +121,18 @@ SUB R2, R1
 MOV [R2], R0
 RET
 
-addr_of_free:
 MOV R0, SP
 MOV R1, 5
 SUB R0, R1
 MOV R1, "Free"
 MOV RO, [R0]
 EQ R0, R1
-JZ R0 addr_of_exit
+JZ R0, 276
 MOV R0, SP
 MOV R1, 4
 SUB R0, R1
-MOV R0, [R0]    //ARG1
-MOV R1, [1024]    //VAL IN RESERVED
+MOV R0, [R0]   
+MOV R1, [1024]    
 MOV [1024], R0
 MOV [R0], R1
 MOV R2, SP
@@ -148,7 +141,6 @@ SUB R2, R3
 MOV [R2],0
 RET
 
-addr_of_exit:
 MOV R1, SP	
 MOV R2, 1
 SUB R1, R2
@@ -160,6 +152,3 @@ MOV R1, 10
 PUSH R1
 INT 10
 RET
-
-
-
