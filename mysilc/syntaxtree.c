@@ -342,7 +342,8 @@ struct tnode* makeOperatorNode(int nodetype, Typetable* type,struct tnode *l,str
 //For Binary Op
 	if(!(checkType(TLookup("int"), l->type) && checkType(TLookup("int"), r->type)))
 	{
-		printf("Type Error: Operator Node\n"); exit(1);
+		if(!(r->type ==NULL))	//TODO CORRECT THIS
+		{	printf("Type Error: Operator Node\n"); exit(1); }
 	}
 	return createTree(-1,type,NULL,nodetype,NULL,l,r,NULL);
 	
