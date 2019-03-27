@@ -1,2 +1,2 @@
-break typetable.c:104
+break syntaxtree.y:227
 

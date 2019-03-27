@@ -79,6 +79,13 @@ tnode* makeMainNode(int nodetype, tnode* body);
 tnode* makeArrayNode(int nodetype, tnode* l, tnode* r);
 tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r);
 tnode* makeNullNode(int nodetype);
+tnode* makeAllocNode(int nodetype, tnode* r);
+tnode* makeInitializeNode(int nodetype, tnode* r);
+tnode* makeFreeNode(int nodetype, tnode* r);
+tnode* makeFieldNode(int nodetype, tnode* l, tnode* r);
+
+
+
 
 
 

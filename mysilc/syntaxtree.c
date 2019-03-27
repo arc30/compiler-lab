@@ -238,7 +238,7 @@ tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 }
 
-makeFreeNode(int nodetype, tnode* r)
+tnode* makeFreeNode(int nodetype, tnode* r)
 {
 	//expr type should be int. an addr actually. 
 	if(checkType(TLookup("int"), r->type) || checkType(TLookup("str"), r->type) || checkType(TLookup("bool"), r->type) || checkType(TLookup("void"), r->type) )
@@ -248,7 +248,7 @@ makeFreeNode(int nodetype, tnode* r)
 	return createTree(-1,TLookup("void"),r->varname,nodetype,NULL,NULL,r,NULL);
 }
 
-makeInitializeNode(int nodetype, tnode* r)
+tnode* makeInitializeNode(int nodetype, tnode* r)
 {
 	if(!checkType(TLookup("int"), r->type))
 	{
@@ -257,7 +257,7 @@ makeInitializeNode(int nodetype, tnode* r)
 	return createTree(-1,TLookup("void"),r->varname,nodetype,NULL,NULL,r,NULL);
 }
 
-makeAllocNode(int nodetype, tnode* r)
+tnode* makeAllocNode(int nodetype, tnode* r)
 {
 	if(checkType(TLookup("int"), r->type) || checkType(TLookup("str"), r->type) || checkType(TLookup("bool"), r->type) || checkType(TLookup("void"), r->type) )
 	{
@@ -506,6 +506,15 @@ void printValue(struct tnode *t)
 		case MAIN:
 			printf("main {} ");
 			break;
+		case INITIALIZE:
+			printf("initialize() ");
+			break;
+		case ALLOC:
+			printf("alloc() ");
+			break;
+		case DEALLOC:
+			printf("free ");
+			break;	
 		case FUNCCALL:
 			printf("%s( ", t->varname);
 			while(t->argslist != NULL)

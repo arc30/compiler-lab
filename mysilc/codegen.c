@@ -55,7 +55,10 @@ int getReg()
 			exit(1);
 		}
 		
-	return freeRegister++;
+	int reg= freeRegister++;
+	if(reg<0)
+	{printf("GetReg ERROR \n"); exit(1);}
+	return reg;
 }
 
 void freeReg()
@@ -329,7 +332,7 @@ int codeGen(struct tnode* t, FILE* target_file)
 		fprintf(target_file, "POP R%d \n", reg0);
 
 		freeReg();
-
+		fprintf(target_file, "BRKP\n");
 		popAllRegisters(target_file);
 		return -1;
 	}
@@ -361,6 +364,8 @@ int codeGen(struct tnode* t, FILE* target_file)
 		freeReg();
 		freeReg();
 		popAllRegisters(target_file);
+		fprintf(target_file, "BRKP\n");
+
 		return -1;
 	}
 	else if(t->nodetype == DEALLOC)
@@ -428,14 +433,14 @@ int codeGen(struct tnode* t, FILE* target_file)
 	{
 		int reg0 = getFieldPos(target_file,t);
 		fprintf(target_file, "MOV R%d, [R%d]\n",reg0, reg0 );
-		freeReg();
-		return -1;
+		return reg0;
 	}
 
 	else if(t->nodetype == NULLCONST)
 	{
 		int reg0 = getReg();
 		fprintf(target_file, "MOV R%d, %d\n", reg0,-1);
+		return reg0;
 	}
 
 	else if(t->nodetype == CONNECTOR)

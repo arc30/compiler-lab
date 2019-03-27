@@ -55,7 +55,7 @@
 			inorderForm($1);
 			printf("\n\n");
 //codegen
-/*			char* file1="targetfile.xsm";
+			char* file1="targetfile.xsm";
 			printf("\n\nCalling codegen \n");
 			FILE *fptr = fopen(file1,"w");
 			codeGenXsm($1, fptr);
@@ -67,7 +67,7 @@
 			ltlex();
 
 			fclose(ltin);
-*/
+
 //codegen call end
 			}
 	
@@ -75,8 +75,8 @@
 				{			
 					$$ = makeConnectorNode(CONNECTOR,$3, $4); //the full program
 				}		
-			| GDeclBlock MainBlock { 
-									$$ = $2;  
+			| TypeDefBlock GDeclBlock MainBlock { 
+									$$ = $3;  
 									printf("\n gdecl code\n");
 									}
 			| MainBlock	{
@@ -182,7 +182,7 @@
 			  | FDef		{ $$=$1; }
 			  ;
 	
-	FDef	  : TypeName fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
+	FDef	  : 	TypeName fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
 				{
 					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
 
@@ -226,10 +226,10 @@
 	MainBlock	: INT MAIN '(' ')' '{' LDeclBlock codeSection '}'
 					{
 					$$ = makeMainNode(MAIN,$7 );
-					freeLsymbolTable();	
 					
 					printf("\nLsymbol Table of Main\n");
 					printLocalSymbolTable();
+					freeLsymbolTable();	
 					
 					}
 				;
@@ -258,6 +258,7 @@
 	
 	stmt : inputstmt { $$=$1;}
 		| outputstmt { $$=$1; }
+
 		| assgnstmt {$$=$1;}
 		| ifstmt 	{ $$=$1; }
 		| whilestmt { $$=$1; }
@@ -266,14 +267,14 @@
 		| continuestmt	{$$=$1;}
 		| returnstmt	{$$ = $1;}
 		| freestmt		{$$ = $1;}
-		| allocstmt 	{$$ = $1;}
-		| initializestmt	{$$=$1;}
+		|initializestmt {$$=$1;}
+		|allocstmt {$$=$1;}
 	;
 
-	initializestmt : ID '=' INITIALIZE '(' ')'';'
+	initializestmt : ID ASSGN INITIALIZE '(' ')'';'
 					{$$ = makeInitializeNode(INITIALIZE, $1);}
 					;
-	allocstmt : ID '='	ALLOC '('')' ';'
+	allocstmt : ID ASSGN	ALLOC '('')' ';'
 				{
 					$$ = makeAllocNode(ALLOC, $1);
 				}
