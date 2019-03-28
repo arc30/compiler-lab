@@ -345,7 +345,8 @@
 									}
 			   ;
 
-	field : ID '.'	ID			//TODO to be extended 
+	field : field '.' ID { $$ = makeFieldNode(FIELD, $1, $3); }
+		  |	ID '.'	ID			//TODO to be extended 
 		  {
 			  $$ = makeFieldNode(FIELD,$1,$3);
 		  }

@@ -224,7 +224,8 @@ tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r)
 
 tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 {
-	Typetable* ftype = TLookup(l->type->name);
+
+	Typetable* ftype = l->type;
 	if(ftype==NULL)
 	{
 		printf("ERROR in field. typename not found\n"); exit(1);
@@ -235,6 +236,7 @@ tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 		printf("ERROR in field. fieldname not found\n"); exit(1);
 	}
 
+		
 	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 }
 

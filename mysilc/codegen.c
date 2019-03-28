@@ -419,7 +419,6 @@ int codeGen(struct tnode* t, FILE* target_file)
 			int fieldPos = getFieldPos(target_file, t->left);
 			fprintf(target_file, "MOV [R%d], R%d\n ", fieldPos, reg1);
 
-			//mem addr ofTODOOOOO
 		}
 		
 		
