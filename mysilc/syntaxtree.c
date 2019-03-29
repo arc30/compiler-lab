@@ -157,14 +157,9 @@ Convention is to make LEFT child always null
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr)
 {
-<<<<<<< HEAD
-	// TYPECHECK READ
-	if(!checkType(-1, INTTYPE, NOTYPE, lr->type) && !checkType(-1, STRTYPE, NOTYPE, lr->type))
-=======
 	//TODO TYPECHECK READ
 	//if(! checkType(-1,INTTYPE, -1,lr->type) )
 	if(!checkType(TLookup("int"), lr->type) && !checkType(TLookup("str"), lr->type))
->>>>>>> stage6
 		{
 			printf("\nType Error: Read Node \n"); exit(1);
 		}
@@ -406,13 +401,8 @@ tnode* makeContinueNode(int nodetype)
 
 tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, Typetable* returnType)
 {
-<<<<<<< HEAD
-	// TYPECHECK RETURN
-	if(!checkType(returnType,NOTYPE, expr->type ,NOTYPE))
-=======
 	// TODO TYPECHECK RETURN
 	if(!checkType(returnType, expr->type ))
->>>>>>> stage6
 	{
 		printf("Type Error: Return Node\n"); exit(1);
 	}
