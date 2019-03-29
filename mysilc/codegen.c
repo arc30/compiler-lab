@@ -55,7 +55,10 @@ int getReg()
 			exit(1);
 		}
 		
-	return freeRegister++;
+	int reg= freeRegister++;
+	if(reg<0)
+	{printf("GetReg ERROR \n"); exit(1);}
+	return reg;
 }
 
 void freeReg()
@@ -97,6 +100,17 @@ int getVarPos(FILE* target_file, char* ch, Lsymbol* Ltemp)
 
 	}
 
+	return reg0;
+}
+
+int getFieldPos(FILE* target_file, tnode* fieldnode)
+{
+	Typetable* ttemp= fieldnode->left->type;
+	Fieldlist* ftemp = FLookup(ttemp,fieldnode->right->varname);
+	int reg0 = codeGen(fieldnode->left, target_file); //val of var of userdef type ie an addr here
+	int binding = ftemp->fieldIndex;
+
+	fprintf(target_file, "ADD R%d, %d\n", reg0, binding);
 	return reg0;
 }
 
@@ -291,38 +305,141 @@ int codeGen(struct tnode* t, FILE* target_file)
 		popAllRegisters(target_file);
 		return -1;
 	}
+	else if(t->nodetype == INITIALIZE)
+	{
+		pushAllRegisters(target_file);
+
+
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, \"Heapset\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "CALL 0 \n");
+		fprintf(target_file, "POP R%d \n", reg0);	//ret val
+
+		int varPos = getVarPos(target_file, t->right->varname, t->right->lEntry);
+		fprintf(target_file, "MOV [R%d], R%d\n", varPos, reg0);
+		freeReg();
+
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+
+		freeReg();
+		fprintf(target_file, "BRKP\n");
+		popAllRegisters(target_file);
+		return -1;
+	}
+	else if(t->nodetype == ALLOC)
+	{
+		pushAllRegisters(target_file);
+
+		int reg0 = getReg();
+		int reg1 = getReg();
+		fprintf(target_file, "MOV R%d, \"Alloc\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "MOV R%d, 8 \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "CALL 0 \n");
+		fprintf(target_file, "POP R%d \n", reg1);
+
+		int varPos = getVarPos(target_file, t->right->varname, t->right->lEntry);
+		fprintf(target_file, "MOV [R%d], R%d\n", varPos, reg1);
+		freeReg();
+
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+
+		freeReg();
+		freeReg();
+		popAllRegisters(target_file);
+		fprintf(target_file, "BRKP\n");
+
+		return -1;
+	}
+	else if(t->nodetype == DEALLOC)
+	{
+		pushAllRegisters(target_file);
+
+		int reg0 = getReg();
+		int reg1 = codeGen(t->right, target_file);
+		fprintf(target_file, "MOV R%d, \"Free\"\n", reg0);		
+		fprintf(target_file, "PUSH R%d \n", reg0);  	
+		fprintf(target_file, "PUSH R%d \n", reg1);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "PUSH R%d \n", reg0);
+		fprintf(target_file, "CALL 0 \n");
+		fprintf(target_file, "POP R%d \n", reg0); 	//retval
+
+
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+		fprintf(target_file, "POP R%d \n", reg0);
+
+
+		freeReg();
+		freeReg();
+		popAllRegisters(target_file);
+		return -1;
+
+	}
 	else if(t->nodetype == ASSGN)
 	{
 		char* varname = t->left->varname;
-		int varPos = getVarPos(target_file, varname, t->left->lEntry);
 		int reg1 = codeGen(t->right, target_file);
 		if(t->left->nodetype == ID)
 		{
+			int varPos = getVarPos(target_file, varname, t->left->lEntry);		
 			fprintf(target_file, "MOV [R%d], R%d\n ", varPos, reg1);
 		}
 
 		else if(t->left->nodetype == ARR)
 		{
+			int varPos = getVarPos(target_file, varname, t->left->lEntry);		
 			int regPos = codeGen(t->left->right, target_file);
 			fprintf(target_file, "ADD R%d, R%d \n",regPos, varPos);
 			fprintf(target_file, "MOV [R%d], R%d\n ", regPos, reg1);
 			freeReg();
 		}
-
-		
-		else if(t->left->nodetype == DEREF)
+		else if(t->left->nodetype == FIELD)
 		{
-			int reg2 = getReg();
-			fprintf(target_file, "MOV R%d, [R%d] \n",reg2, varPos);
-			fprintf(target_file, "MOV [R%d], R%d \n", reg2, reg1 );
-			freeReg();
-		}
+			int fieldPos = getFieldPos(target_file, t->left);
+			fprintf(target_file, "MOV [R%d], R%d\n ", fieldPos, reg1);
 
+		}
+		
+		
 		freeReg();
 		freeReg();
 		return -1;
 	}
 	
+		
+	else if( t->nodetype == FIELD)
+	{
+		int reg0 = getFieldPos(target_file,t);
+		fprintf(target_file, "MOV R%d, [R%d]\n",reg0, reg0 );
+		return reg0;
+	}
+
+	else if(t->nodetype == NULLCONST)
+	{
+		int reg0 = getReg();
+		fprintf(target_file, "MOV R%d, %d\n", reg0,-1);
+		return reg0;
+	}
+
 	else if(t->nodetype == CONNECTOR)
 	{
 		codeGen(t->left, target_file);	
@@ -428,20 +545,8 @@ int codeGen(struct tnode* t, FILE* target_file)
 		}
 		return -1;
 	}
-	else if(t->nodetype == DEREF)
-	{
-		int reg0 = getReg();
-		int reg1 = codeGen(t->right, target_file);
-		fprintf(target_file, "MOV R%d, [R%d]\n ",reg0, reg1);
-		freeReg();
-		
-		return reg0;
-	}
-	else if(t->nodetype == ADDROF)
-	{
-		int reg0 = getVarPos(target_file, t->right->varname, t->right->lEntry);
-		return reg0;
-	}
+
+
 	// funCall, funcDef, returnstmt
 
 	else if(t->nodetype == FUNCCALL)

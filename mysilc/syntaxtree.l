@@ -8,6 +8,8 @@
 	int number;
 	char* varname;
 	char* constname;
+	void yyerror(char const *s);
+
 	
 %}
 	
@@ -31,15 +33,17 @@
 [ \t\n] {}
 "["	{return *yytext;}
 "]"	{return *yytext;}
-[();,{}] {return *yytext;}
+[();,.{}] {return *yytext;}
 "begin" {return BEG;}
 "end"	{return END;}
+"type"	{return TYPE;}
+"endtype" {return ENDTYPE;}	
 "read" {return READ;}
-"Read" {return READ;}
-
+"null"	{return NULLCONST;}
 "write" {return WRITE;}
-"Write" {return WRITE;}
-
+"initialize"	{return INITIALIZE;}
+"dealloc"	{return DEALLOC;}
+"alloc"		{return ALLOC;}
 "if"	{return IF;}
 "then"	{return THEN;}
 "else"	{return ELSE;}

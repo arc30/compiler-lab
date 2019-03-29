@@ -1,6 +1,7 @@
 #ifndef SYNTAXTREE_H
 #define SYNTAXTREE_H
 
+#include "typetable.h"
 #include "symboltable.h"
 #define INTTYPE 1
 #define BOOLTYPE 0
@@ -8,12 +9,13 @@
  //TODO MAKE THESE TOKENS
 #define NOTYPE -1
 
+//typedef struct Lsymbol Lsymbol;
 
 
 typedef struct tnode
 {
 	int val;
-	int type;
+	struct Typetable* type;
 	char* varname;
 	int nodetype;
 	struct tnode* argslist;
@@ -25,9 +27,9 @@ typedef struct tnode
 
 
 /*Make a leaf tnode and set the value of val field*/
-struct tnode* createTreeWithLenty(int val, int type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
+struct tnode* createTreeWithLenty(int val, Typetable* type, char* c, int nodetype, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
 
-struct tnode* createTree(int val, int type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
+struct tnode* createTree(int val, Typetable* type, char* c, int nodetype, Gsymbol* gEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr );
 	
 struct tnode* makeConnectorNode(int nodetype, struct tnode* l, struct tnode* r);
 
@@ -39,7 +41,7 @@ struct tnode* makeLeafNodeNum(int nodetype, int n);
 
 struct tnode* makeAssignmentNode(int nodetype, char c, struct tnode* l, struct tnode* r);
 
-struct tnode* makeOperatorNode(int nodetype, int type,struct tnode *l,struct tnode *r);
+struct tnode* makeOperatorNode(int nodetype, Typetable* type,struct tnode *l,struct tnode *r);
 
 struct tnode* makeReadNode(int nodetype, struct tnode* lr);
 
@@ -59,15 +61,36 @@ tnode* makeContinueNode(int nodetype);
 
 void inorderForm(struct tnode* t);
 
-tnode* makeFuncdefNode(int nodetype, char* ch, int type, tnode*l, tnode* r);
+tnode* makeFuncdefNode(int nodetype, char* ch, Typetable* type, tnode*l, tnode* r);
 
-tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, int returnType);
+tnode* makeReturnNode(int nodetype, tnode* expr, Lsymbol* lentry, Typetable* returnType);
 
 
 
-int checkType(int expectedOperand1Type, int expectedOperand2Type, int operand1type, int operand2type);
+int checkType(Typetable* type1, Typetable* type2);
 
-void checkTypeIfElse(int guardType, int thenType, int elseType );
+void checkTypeIfElse(Typetable* guardType, Typetable* thenType, Typetable* elseType );
+
+tnode* makeTypeNode(char* typename);
+
+void printValue(struct tnode *t);
+tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist );
+tnode* makeMainNode(int nodetype, tnode* body);
+tnode* makeArrayNode(int nodetype, tnode* l, tnode* r);
+tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r);
+tnode* makeNullNode(int nodetype);
+tnode* makeAllocNode(int nodetype, tnode* r);
+tnode* makeInitializeNode(int nodetype, tnode* r);
+tnode* makeFreeNode(int nodetype, tnode* r);
+tnode* makeFieldNode(int nodetype, tnode* l, tnode* r);
+
+
+
+
+
+
+
+
 
 
 

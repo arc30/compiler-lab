@@ -1,13 +1,14 @@
 #include "funcdef.h"
 
 #include "symboltable.h"
+#include "typetable.h"
 
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-void checkNameEquivalence(char* funcname, int returntype, struct paramStruct* fdefparamlist)
+void checkNameEquivalence(char* funcname, Typetable* returntype, struct paramStruct* fdefparamlist)
 {
     Gsymbol* temp = Glookup(funcname);
     if(temp == NULL)
@@ -16,7 +17,7 @@ void checkNameEquivalence(char* funcname, int returntype, struct paramStruct* fd
         exit(0);
     }
 
-    if(returntype != temp->type)
+    if(!checkType(returntype,temp->type))
     {
         printf("ERR: return type mismatch for %s\n",funcname);
         exit(0);
@@ -34,7 +35,7 @@ void checkNameEquivalence(char* funcname, int returntype, struct paramStruct* fd
             printf("ERR: Args name mismatch for %s\n", funcname);
             exit(0);
         }
-        if(p1->paramType != p2->paramType)
+        if(!checkType(p1->paramType,p2->paramType))
         {
             printf("ERR: Argstype name mismatch for %s\n", funcname);
             exit(0);

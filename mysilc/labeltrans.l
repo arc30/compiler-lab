@@ -16,6 +16,10 @@
         struct node* next;
     }node;
     node* labelHead = NULL;
+
+    int getAddr(char* s);
+    void saveLabelAddr(char* s);
+
 	
 %}
 
