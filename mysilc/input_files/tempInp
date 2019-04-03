@@ -1,0 +1,47 @@
+type
+  marks
+  {
+    int chem;
+    int phy;
+  }
+  
+  person
+  {
+    int age;
+    str name;
+    marks res;
+    int pincode;
+    int rollno;
+  }
+
+endtype
+
+decl
+  person p1;
+  
+enddecl
+
+
+
+int main()
+{
+  decl
+    marks m1;
+    int c;
+  enddecl
+
+  begin
+
+   p1=alloc();
+    m1=alloc();
+
+     m1.chem = 9;
+    m1.phy = 18;
+
+    p1.age = 5;
+    p1.res = m1;
+
+ 
+   
+  end
+}
