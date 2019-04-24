@@ -38,6 +38,8 @@
 "end"	{return END;}
 "type"	{return TYPE;}
 "endtype" {return ENDTYPE;}	
+"class"		{return CLASS;}
+"endclass"	{return ENDCLASS;}
 "read" {return READ;}
 "null"	{return NULLCONST;}
 "write" {return WRITE;}

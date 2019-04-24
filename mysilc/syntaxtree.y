@@ -41,6 +41,7 @@
 	%token INITIALIZE ALLOC DEALLOC
 
 	%token INTPTR STRPTR NULLCONST
+	%token CLASS ENDCLASS
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
@@ -71,9 +72,11 @@
 //codegen call end
 			}
 	
-	program : TypeDefBlock GDeclBlock FDefBlock MainBlock 
+	program : TypeDefBlock ClassDefBlock GDeclBlock FDefBlock MainBlock 
 				{			
-					$$ = makeConnectorNode(CONNECTOR,$3, $4); //the full program
+					//classdefblock to be included in ast?
+
+					$$ = makeConnectorNode(CONNECTOR,$4, $5); //the full program
 				}		
 			| TypeDefBlock GDeclBlock MainBlock { 
 									$$ = $3;  
@@ -121,6 +124,52 @@
 							$$=makeTypeNode($1->varname);
 						}
 				;
+
+
+	ClassDefBlock : CLASS ClassDefList ENDCLASS
+				  {
+					  //print class ast.
+				  }	
+				  ;
+
+	ClassDefList : ClassDefList ClassDef
+				 {
+					$$ = makeConnectorNode(CONNECTOR, $1, $2);
+				 }
+				 | ClassDef
+				 {
+					 $$ = $1;
+				 }
+				 ;	
+	ClassDef 	: Cname '{' DECL FieldLists MethodDecl ENDDECL MethodDefns '}'
+				{
+
+				}
+				;
+
+	Cname 		: ID
+				{
+					Cptr = Cinstall($1->name, NULL);
+				}	
+				;
+
+	FieldLists : FieldLists FID;
+
+	FID			: ID ID ';' 
+				{Class_Finstall(Cptr,$1->Name,$2->Name);} //Installing the field to the class
+				;
+
+	MethodDecl : MethodDecl MDecl 
+			   | MDecl 
+			   ;
+	
+	MDecl      : ID ID '(' Paramlist ')' ';' {Class_Minstall(Cptr,$2->Name,Tlookup($1->Name),$4);} 
+												//Installing the method to class
+	           ;
+	MethodDefns : MethodDefns FDef
+				| FDef
+				;
+
 
 
 	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
