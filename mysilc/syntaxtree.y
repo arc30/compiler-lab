@@ -38,7 +38,7 @@
 	%token DECL ENDDECL INT STR STRCONST
 	%token ARR ARR2D DEREF 
 	%token TYPE ENDTYPE FIELDDECL FIELD
-	%token INITIALIZE ALLOC DEALLOC
+	%token INITIALIZE ALLOC DEALLOC NEW DELETE
 
 	%token INTPTR STRPTR NULLCONST
 	%token CLASS ENDCLASS
@@ -327,6 +327,10 @@
 				{
 					$$=makeFreeNode(DEALLOC,$3);
 				}
+			| DELETE '(' Field ')' ';'	
+			{
+
+			}
 			;
 	
 	inputstmt : READ '(' ID ')' ';'	{$$ = makeReadNode(READ, $3);}
@@ -344,6 +348,11 @@
 			  {
 				  $$ = makeAssignmentNode(ASSGN, '=',$1,$3 );
 			  }			
+			  | ID ASSGN NEW '(' ID ')' ';'
+			  {
+
+			  }
+			  | field ASSGN NEW '(' ID ')' ';'
 			 
 			  ;	
 
@@ -390,11 +399,22 @@
 			   ;
 
 	field : field '.' ID { $$ = makeFieldNode(FIELD, $1, $3); }
-		  |	ID '.'	ID			//TODO to be extended 
+		  |	ID '.'	ID			 
 		  {
 			  $$ = makeFieldNode(FIELD,$1,$3);
 		  }
 		  ;
+
+	fieldFunction : SELF '.' ID '(' Arglist ')'
+                |ID '.' ID '(' Arglist ')'  	//This will not occur inside a class.
+                |Field '.' ID '(' Arglist ')'             
+		        ;
+	
+	Arglist : Arglist ',' Expr
+			|Expr
+			; 
+
+
 	expr : expr PLUS expr 
 			{
 				$$ = makeOperatorNode(PLUS,TLookup("int"),$1,$3);
@@ -430,6 +450,9 @@
 			$$ = makeArrayNode(ARR, $1,$3);
 		}
 	| field { $$ = $1;}
+//samshayam	
+	| fieldFunction {  }  
+
 	|NULLCONST { $$ = makeNullNode(NULLCONST);}
 
 	| STRCONST {$$ = $1;}	
