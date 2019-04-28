@@ -8,6 +8,9 @@ typedef struct Typetable
     int size;                   //size of the type
     struct Fieldlist *fields;   //pointer to the head of fields list
     struct Typetable *next;     // pointer to the next type table entry
+    void* classEntry;       //hack used to avoid including classtable.h (circular err)
+                            //pointer to class table entry in case this tyoe is of a class
+                            //otherwise set null
 } Typetable;
 
 
@@ -24,6 +27,10 @@ Typetable* TLookup(char* name);
 void TInstall(void* idnod, void* fieldtre);
 void typeTableCreate();
 Fieldlist* FLookup(Typetable* type, char* name);
+void TInstallClass(char* name, void* classEntry);
+void TInstallMain(void* idnod, void* fieldtre, void* classEntry);
+
+
 
 
 

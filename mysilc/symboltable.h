@@ -53,6 +53,8 @@ Lsymbol* fetchLsymbolHead();
 void freeLsymbolTable();
 void LinstallParameters(paramStruct* paramlist);
 void LinstallVar(char* name, Typetable* type);
+int getNewFuncLabel();
+
 
 
 

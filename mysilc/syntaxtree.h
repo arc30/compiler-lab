@@ -3,6 +3,7 @@
 
 #include "typetable.h"
 #include "symboltable.h"
+#include "classtable.h"
 #define INTTYPE 1
 #define BOOLTYPE 0
 #define STRTYPE 2
@@ -83,6 +84,8 @@ tnode* makeAllocNode(int nodetype, tnode* r);
 tnode* makeInitializeNode(int nodetype, tnode* r);
 tnode* makeFreeNode(int nodetype, tnode* r);
 tnode* makeFieldNode(int nodetype, tnode* l, tnode* r);
+tnode* makeNewNode(int nodetype, tnode* r);
+
 
 
 

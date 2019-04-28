@@ -10,6 +10,7 @@
 	#include "funcdef.h" 
 	#include "syntaxtree.h"
 	#include "typetable.h"
+	#include "classtable.h"
 
 	#include "symboltable.h"
 	
@@ -20,10 +21,12 @@
 	extern int yyparse();
 	extern FILE *yyin;
 	extern FILE *ltin;
+	extern int lineNumber;
 	
 
 	Typetable* currType;
 	Typetable* returnType;
+	Classtable* Cptr = NULL;
 
 	void yyerror(char const *s);
 
@@ -41,7 +44,7 @@
 	%token INITIALIZE ALLOC DEALLOC NEW DELETE
 
 	%token INTPTR STRPTR NULLCONST
-	%token CLASS ENDCLASS
+	%token CLASS ENDCLASS SELF
 
 	%left EQUAL NOTEQUAL
 	%left GREATERTHAN GREATERTHAN_EQUAL LESSTHAN LESSTHAN_EQUAL
@@ -56,7 +59,7 @@
 			inorderForm($1);
 			printf("\n\n");
 //codegen
-			char* file1="targetfile.xsm";
+/*			char* file1="targetfile.xsm";
 			printf("\n\nCalling codegen \n");
 			FILE *fptr = fopen(file1,"w");
 			codeGenXsm($1, fptr);
@@ -68,7 +71,7 @@
 			ltlex();
 
 			fclose(ltin);
-
+*/
 //codegen call end
 			}
 	
@@ -76,7 +79,7 @@
 				{			
 					//classdefblock to be included in ast?
 
-					$$ = makeConnectorNode(CONNECTOR,$4, $5); //the full program
+					$$ = makeConnectorNode(CONNECTOR,makeConnectorNode(CONNECTOR,$2,$4), $5); //the full program
 				}		
 			| TypeDefBlock GDeclBlock MainBlock { 
 									$$ = $3;  
@@ -128,7 +131,7 @@
 
 	ClassDefBlock : CLASS ClassDefList ENDCLASS
 				  {
-					  //print class ast.
+					  $$ = $2;
 				  }	
 				  ;
 
@@ -143,36 +146,42 @@
 				 ;	
 	ClassDef 	: Cname '{' DECL FieldLists MethodDecl ENDDECL MethodDefns '}'
 				{
-
+					$$ = $5; 	//just simply	
+					Cptr = NULL;
 				}
 				;
 
 	Cname 		: ID
 				{
-					Cptr = Cinstall($1->name, NULL);
+					Cptr = CInstall($1->varname, NULL);
 				}	
 				;
 
-	FieldLists : FieldLists FID;
+	FieldLists : FieldLists FID
+				| FID
+				;
 
-	FID			: ID ID ';' 
-				{Class_Finstall(Cptr,$1->Name,$2->Name);} //Installing the field to the class
+	FID			: TypeName ID ';' 
+				{Class_Finstall(Cptr,$1->varname,$2->varname);} //Installing the field to the class
 				;
 
 	MethodDecl : MethodDecl MDecl 
 			   | MDecl 
 			   ;
 	
-	MDecl      : ID ID '(' Paramlist ')' ';' {Class_Minstall(Cptr,$2->Name,Tlookup($1->Name),$4);} 
+	MDecl      : TypeName ID '(' paramlist ')' ';' { 	Typetable* tmp=TLookup($1->varname);
+												Class_Minstall(Cptr,$2->varname,tmp,fetchParamHead());
+												resetParamHeadTail();		
+												} 
 												//Installing the method to class
 	           ;
-	MethodDefns : MethodDefns FDef
-				| FDef
+	MethodDefns : MethodDefns FDef {$$ = makeConnectorNode(CONNECTOR,$1,$2);}
+				| FDef	{$$=$1;}
 				;
 
 
-
-	GDeclBlock : DECL Gdeclist ENDDECL		{printf("global declaration list\n");
+	GDeclBlock : DECL Gdeclist ENDDECL		{
+											printf("global declaration list\n");
 											printSymbolTable();	
 											}
 				|	DECL ENDDECL			{printf("No global decl list\n") ; }
@@ -233,7 +242,9 @@
 	
 	FDef	  : 	TypeName fname '(' paramlist ')' '{' LDeclBlock codeSection  '}'
 				{
-					checkNameEquivalence($2->varname, $1->type, fetchParamHead() );
+					//TODO for class MethodDefns
+					if(Cptr)
+					{checkNameEquivalence($2->varname, $1->type, fetchParamHead() );}
 
 					
 					$$ = makeFuncdefNode(FUNC,$2->varname,$1->type,$2,$8);
@@ -253,6 +264,7 @@
 	LDeclBlock : DECL LDeclList ENDDECL { 
 										LinstallParameters(fetchParamHead()); 	
 										//Linstall in the begng
+
 										}
 			   | DECL ENDDECL { LinstallParameters(fetchParamHead()); }
 			   ;
@@ -322,12 +334,12 @@
 				{
 					$$ = makeAllocNode(ALLOC, $1);
 				}
-
+	
 	freestmt : DEALLOC '(' ID ')' ';'
 				{
 					$$=makeFreeNode(DEALLOC,$3);
 				}
-			| DELETE '(' Field ')' ';'	
+			| DELETE '(' field ')' ';'	
 			{
 
 			}
@@ -350,11 +362,13 @@
 			  }			
 			  | ID ASSGN NEW '(' ID ')' ';'
 			  {
-
+				  $$ = makeAssignmentNode(ASSGN,'=',$1, makeNewNode(NEW, $5));
 			  }
-			  | field ASSGN NEW '(' ID ')' ';'
-			 
-			  ;	
+			  | field ASSGN NEW '(' ID ')' ';'	
+			  {
+				  $$ = makeAssignmentNode(ASSGN, '=', $1, makeNewNode(NEW, $5));
+			  }
+			  ;
 
 	
 	ifstmt : IF '(' expr ')' THEN slist ELSE slist ENDIF ';'
@@ -403,15 +417,19 @@
 		  {
 			  $$ = makeFieldNode(FIELD,$1,$3);
 		  }
+		  | SELF '.' ID
+		  {
+			  $$ = makeFieldNode(FIELD, makeLeafNodeVar(ID,"SELF"), $3);
+		  }
 		  ;
 
 	fieldFunction : SELF '.' ID '(' Arglist ')'
                 |ID '.' ID '(' Arglist ')'  	//This will not occur inside a class.
-                |Field '.' ID '(' Arglist ')'             
+                |field '.' ID '(' Arglist ')'             
 		        ;
 	
-	Arglist : Arglist ',' Expr
-			|Expr
+	Arglist : Arglist ',' expr
+			|expr
 			; 
 
 
@@ -452,6 +470,7 @@
 	| field { $$ = $1;}
 //samshayam	
 	| fieldFunction {  }  
+	
 
 	|NULLCONST { $$ = makeNullNode(NULLCONST);}
 
@@ -507,7 +526,7 @@
 	
 void yyerror(char const *s)
 	{
-	printf("yyerror %s",s);
+	printf("yyerror %s line %d",s,lineNumber);
 	}
 	
 

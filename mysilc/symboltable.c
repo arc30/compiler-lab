@@ -20,6 +20,11 @@ int funcLabel = 0;
 int nextLocalBinding = 0;
 int nextParamBinding = -3;
 
+int getNewFuncLabel()
+{
+    return funcLabel++;
+}
+
 void printSymbolTable()
 {
     Gsymbol*temp = head;
@@ -129,7 +134,7 @@ void endIfRedeclaredLocally(char* name)
     {
         if(strcmp(name, temp->name)==0)
         {
-            printf("ERROR : Multiple declaration of local variable\n");
+            printf("ERROR : Multiple declaration of local variable %s \n", name);
             exit(1);
         }
         temp=temp->next;
@@ -194,8 +199,7 @@ void Ginstall(char* name, Typetable* type, int size, int colSize, int flabel, st
 
 void GinstallFunc(char* name, Typetable* type, paramStruct* paramlist)
 {
-    Ginstall(name,type,0,0,funcLabel,paramlist);
-    funcLabel++;
+    Ginstall(name,type,0,0,getNewFuncLabel(),paramlist);
 }
 void GinstallVar(char* name, Typetable* type, int size, int colSize)
 {
@@ -248,6 +252,7 @@ void LinstallParameters(paramStruct* paramlist)
 void freeLsymbolTable()
 {
     //free the entire space?
+    printf("freelsymbol####\n\n");
     LsymbolHead = NULL;
     LsymbolTail = NULL;
     nextLocalBinding = 0;

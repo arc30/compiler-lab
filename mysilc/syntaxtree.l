@@ -9,6 +9,7 @@
 	char* varname;
 	char* constname;
 	void yyerror(char const *s);
+	int lineNumber = 1;
 
 	
 %}
@@ -30,7 +31,8 @@
 "<"	{return LESSTHAN;}
 "!=" {return NOTEQUAL;}
 "%"  {return MOD;}
-[ \t\n] {}
+[ \t] {}
+[\n]	{lineNumber++;}
 "["	{return *yytext;}
 "]"	{return *yytext;}
 [();,.{}] {return *yytext;}
@@ -40,6 +42,9 @@
 "endtype" {return ENDTYPE;}	
 "class"		{return CLASS;}
 "endclass"	{return ENDCLASS;}
+"self"	{return SELF;}
+"new"	{return NEW;}
+"delete"	{return DELETE;}
 "read" {return READ;}
 "null"	{return NULLCONST;}
 "write" {return WRITE;}

@@ -141,7 +141,7 @@ Fieldlist* insertInFieldList(Typetable* newTypeEntry,Fieldlist* fieldhead, char*
     return fieldhead;
 }
 
-void TInstall(void* idnod, void* fieldtre)
+void TInstallMain(void* idnod, void* fieldtre, void* classEntry)
 {
     tnode* idnode = (tnode*) idnod;
     tnode* fieldtree = (tnode*) fieldtre;
@@ -173,6 +173,7 @@ void TInstall(void* idnod, void* fieldtre)
     newEntry->size = fieldindex;
     newEntry->fields = FieldHead;
     newEntry->next = NULL;
+    newEntry->classEntry = classEntry;
 
     if(TypeHead == NULL || TypeTail==NULL )
     {
@@ -181,6 +182,32 @@ void TInstall(void* idnod, void* fieldtre)
 
     TypeTail->next = newEntry;
     TypeTail = newEntry;
+}
+
+void TInstall(void* idnod, void* fieldtre)
+{
+    TInstallMain(idnod, fieldtre, NULL);
+}
+void TInstallClass(char* name, void* classEntry)
+{
+    endIfRedeclaredType(name );    
+    Typetable* newEntry = (Typetable*)malloc(sizeof(Typetable));
+    newEntry->name = malloc(sizeof(name));
+    strcpy(newEntry->name, name);
+    newEntry->size = 0;
+    newEntry->fields = NULL;
+    newEntry->next = NULL;
+    newEntry->classEntry = classEntry;
+
+    if(TypeHead == NULL || TypeTail==NULL )
+    {
+        printf("Error in setting up typetable\n"); exit(-1);
+    }
+
+    TypeTail->next = newEntry;
+    TypeTail = newEntry;    
+
+
 }
 
 Fieldlist* FLookup(Typetable* type, char* name)

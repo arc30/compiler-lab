@@ -1,2 +1,2 @@
-break syntaxtree.y:227
+break symboltable.c:136
 

@@ -5,6 +5,8 @@
 #include <string.h>
 #include "symboltable.h"
 
+extern int Cptr;
+
 
 tnode* createTreeWithArglist(int val, Typetable* type, char* c, int nodetype, tnode* argslist, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr)
 {
@@ -119,6 +121,11 @@ tnode* makeTypeNode(char* typename)
 	return createTree(-1,type,typename,-1,NULL,NULL,NULL,NULL);
 }
 
+tnode* makeNewNode(int nodetype, tnode* r)
+{
+	return createTree(-1, NULL, NULL, nodetype, NULL, NULL, r, NULL);
+}
+
 tnode* makeFuncCallNode(int nodetype, char* c, tnode* arglist )
 {
 	Typetable* type = TLookup("void");
@@ -224,19 +231,29 @@ tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r)
 
 tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 {
-
-	Typetable* ftype = l->type;
-	if(ftype==NULL)
+	if(l->varname!=NULL && strcmp(l->varname,"SELF")==0)	//field in class
 	{
-		printf("ERROR in field. typename not found\n"); exit(1);
+		if(Cptr == NULL)
+		{
+			printf("Self used outside Class. ERR\n"); exit(-1);
+		}	
+		Class_Flookup()
+	
 	}
-	Fieldlist* field = FLookup(ftype,r->varname);
-	if(field == NULL)
+	else	//field in struct
 	{
-		printf("ERROR in field. fieldname not found\n"); exit(1);
-	}
+		Typetable* ftype = l->type;
+		if(ftype==NULL)
+		{
+			printf("ERROR in field. typename not found\n"); exit(1);
+		}
+		Fieldlist* field = FLookup(ftype,r->varname);
+		if(field == NULL)
+		{
+			printf("ERROR in field. fieldname not found\n"); exit(1);
+		}
 
-		
+	}	
 	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 }
 
@@ -446,6 +463,9 @@ void printValue(struct tnode *t)
 		case ASSGN:
 			printf("= ");
 			break;
+		case NEW:
+			printf("new ");
+			break;
 		case GREATERTHAN_EQUAL:
 			printf(">= ");
 			break;
@@ -508,6 +528,9 @@ void printValue(struct tnode *t)
 			break;
 		case MAIN:
 			printf("main {} ");
+			break;
+		case SELF:
+			printf("self ");
 			break;
 		case INITIALIZE:
 			printf("initialize() ");

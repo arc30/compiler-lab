@@ -25,21 +25,25 @@ void endIfRedeclaredClass(char* name)
 
 
 
-void CInstall(char *name,char *parent_class_name) 
+Classtable* CInstall(char *name, char *parent_class_name) 
 {
     static int classIndex = 0;
 
     endIfRedeclaredClass(name);
 
     Classtable* newEntry = (Classtable*)malloc(sizeof(Classtable));
-    if(name == NULL || parent_class_name == NULL)
+    if(name == NULL ) 
     {
-        printf("name/parentname null detected\n ERR\n"); exit(-1);
+        printf("name null detected\n ERR\n"); exit(-1);
     }
+    
     newEntry->Name = (char*)malloc(strlen(name)+1);
     strcpy(newEntry->Name,name);
-
-    newEntry->Parentptr = (char*)malloc(strlen(parent_class_name)+1);
+    newEntry->Parentptr=NULL;
+    if(parent_class_name!=NULL)
+    {
+        newEntry->Parentptr = malloc(strlen(parent_class_name)+1);
+    }
     newEntry->Class_index = classIndex++;
     newEntry->Fieldcount=0;
     newEntry->Memberfield=NULL;
@@ -58,6 +62,9 @@ void CInstall(char *name,char *parent_class_name)
         ClassTail->Next = newEntry;
         ClassTail = newEntry;
     }
+
+    TInstallClass(name, (void*)newEntry);
+    return newEntry;
     
 }
 
@@ -76,7 +83,7 @@ struct Classtable* CLookup(char *name)
     return NULL;       
 }
 
-endIfRedeclaredField(ClassFieldlist* fields, char* name)
+void endIfRedeclaredClassField(ClassFieldlist* fields, char* name)
 { 
     ClassFieldlist* temp = fields;
     while(temp)
@@ -90,7 +97,7 @@ endIfRedeclaredField(ClassFieldlist* fields, char* name)
     }
 }
 
-endIfRedeclaredMethod(ClassMemberfunclist* methods, char* name)
+void endIfRedeclaredMethod(ClassMemberfunclist* methods, char* name)
 {
     ClassMemberfunclist* temp = methods;
     while(temp)
@@ -112,7 +119,7 @@ void Class_Finstall(Classtable *cptr, char* typeName, char *name)
     {
         printf("ERR Null detected in finstall\n"); exit(-1);
     }
-    endIfRedeclaredField(cptr->Memberfield, name);
+    endIfRedeclaredClassField(cptr->Memberfield, name);
     ClassFieldlist* newEntry = (ClassFieldlist*)malloc(sizeof(ClassFieldlist));
     newEntry->Ctype = cptr;
     newEntry->Type = TLookup(typeName);
@@ -131,11 +138,56 @@ void Class_Finstall(Classtable *cptr, char* typeName, char *name)
     
 }
 
-void Class_Minstall(Classtable *cptr, char *name, Typetable *type, paramStruct *Paramlist)
+void Class_Minstall(Classtable *cptr, char *name, Typetable *type, struct paramStruct *Paramlist)
 {
     if(cptr==NULL || name==NULL || type==NULL)
     {
         printf("ERR Null detected in minstall\n"); exit(-1);
     }    
     endIfRedeclaredMethod(cptr->Vfuncptr, name);
+    ClassMemberfunclist* newEntry = (ClassMemberfunclist*)malloc(sizeof(ClassMemberfunclist));
+    newEntry->Name=name;
+    newEntry->paramlist= Paramlist;
+    newEntry->Next = NULL;
+    newEntry->Flabel = getNewFuncLabel();
+    if(cptr->Vfuncptr == NULL)
+    {
+        newEntry->Funcposition = 0;
+        cptr->Vfuncptr = newEntry;
+    }
+    else
+    {
+        newEntry->Funcposition = (cptr->Vfuncptr->Funcposition) ++;
+        newEntry->Next = cptr->Vfuncptr;
+        cptr->Vfuncptr = newEntry;
+    }
+    
+}
+
+ClassMemberfunclist* Class_Mlookup (struct Classtable* Ctype, char* Name)
+{
+    if(Ctype==NULL || Name==NULL)
+        {    printf("ERR Null detected in Mlookup\n"); exit(-1); }
+    ClassMemberfunclist* temp = Ctype->Vfuncptr;
+    while(temp)
+    {
+        if(strcmp(Name,temp->Name)==0)
+            {return temp;}
+        temp = temp->Next;
+    }
+    return NULL;
+}
+
+ClassFieldlist* Class_Flookup(struct Classtable* Ctype,char* Name)
+{
+    if(Ctype==NULL || Name==NULL)
+        {    printf("ERR Null detected in Flookup\n"); exit(-1); }
+    ClassFieldlist* temp = Ctype->Memberfield;
+    while(temp)
+    {
+        if(strcmp(Name,temp->Name)==0)
+            {return temp;}
+        temp = temp->Next;
+    }
+    return NULL;
 }

@@ -15,7 +15,7 @@ typedef struct ClassFieldlist{
 typedef struct ClassMemberfunclist {
  	char *Name;                      //name of the member function in the class
 	struct Typetable *Type;          //pointer to typetable
-	struct Paramstruct *paramlist;   //pointer to the head of the formal parameter list
+	struct paramStruct *paramlist;   //pointer to the head of the formal parameter list
 	int Funcposition;                //position of the function in the class table
  	int Flabel;                      //A label for identifying the starting address of the function's code in the memory
 	struct ClassMemberfunclist *Next;     //pointer to next Memberfunclist entry
@@ -33,11 +33,11 @@ typedef struct Classtable {
 	struct Classtable *Next;              //pointer to next class table entry
 }Classtable;
 
-void CInstall(char *name, char *parent_class_name);
+Classtable* CInstall(char *name, char *parent_class_name);
 struct Classtable* CLookup(char *name);
 void Class_Finstall(Classtable *cptr, char* typeName, char *name);
-void Class_Minstall(Classtable *cptr, char *name, Typetable *type, paramStruct *Paramlist);
-
-
+void Class_Minstall(Classtable *cptr, char *name, Typetable *type, struct paramStruct *Paramlist);
+ClassMemberfunclist* Class_Mlookup (struct Classtable* Ctype, char* Name);
+ClassFieldlist* Class_Flookup(struct Classtable* Ctype,char* Name);
 
 #endif
