@@ -28,11 +28,15 @@
 	end
 	}
 	bst getroot(){
+  decl
+  enddecl
 	begin
 	return self.root;
 	end
 	}
 	int setroot(bst n1){
+   decl
+   enddecl 
 	begin
 	self.root=n1;
 	return 1;

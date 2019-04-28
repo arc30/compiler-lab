@@ -5,7 +5,7 @@
 #include <string.h>
 #include "symboltable.h"
 
-extern int Cptr;
+extern Classtable* Cptr;
 
 
 tnode* createTreeWithArglist(int val, Typetable* type, char* c, int nodetype, tnode* argslist, Gsymbol* gEntry, Lsymbol* lEntry, struct tnode* l, struct tnode* r, struct tnode* elseptr)
@@ -231,13 +231,19 @@ tnode* makeFieldDeclNode(int nodetype, tnode* l, tnode* r)
 
 tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 {
-	if(l->varname!=NULL && strcmp(l->varname,"SELF")==0)	//field in class
+	if(l->varname!=NULL && r->varname!=NULL && strcmp(l->varname,"SELF")==0)	//field in class
 	{
 		if(Cptr == NULL)
 		{
 			printf("Self used outside Class. ERR\n"); exit(-1);
 		}	
-		Class_Flookup()
+		ClassFieldlist* field = Class_Flookup(Cptr, r->varname);
+		if(field==NULL)
+		{
+			printf("ERROR in Class member field. fieldname %s not found\n", r->varname); exit(1);
+		}
+	return createTree(-1,field->Type,r->varname,nodetype,NULL,l,r,NULL);
+
 	
 	}
 	else	//field in struct
@@ -252,9 +258,9 @@ tnode* makeFieldNode(int nodetype, tnode* l, tnode* r)
 		{
 			printf("ERROR in field. fieldname not found\n"); exit(1);
 		}
+	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 
 	}	
-	return createTree(-1,field->type,r->varname,nodetype,NULL,l,r,NULL);
 }
 
 tnode* makeFreeNode(int nodetype, tnode* r)

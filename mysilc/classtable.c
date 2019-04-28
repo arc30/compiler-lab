@@ -28,6 +28,7 @@ void endIfRedeclaredClass(char* name)
 Classtable* CInstall(char *name, char *parent_class_name) 
 {
     static int classIndex = 0;
+    
 
     endIfRedeclaredClass(name);
 
@@ -123,7 +124,10 @@ void Class_Finstall(Classtable *cptr, char* typeName, char *name)
     ClassFieldlist* newEntry = (ClassFieldlist*)malloc(sizeof(ClassFieldlist));
     newEntry->Ctype = cptr;
     newEntry->Type = TLookup(typeName);
+    newEntry->Name=malloc(strlen(name)+1);
+    strcpy(newEntry->Name, name);
     newEntry->Next = NULL;
+    cptr->Fieldcount++;
     if(cptr->Memberfield == NULL)
     {
         newEntry->Fieldindex = 0;
@@ -146,10 +150,14 @@ void Class_Minstall(Classtable *cptr, char *name, Typetable *type, struct paramS
     }    
     endIfRedeclaredMethod(cptr->Vfuncptr, name);
     ClassMemberfunclist* newEntry = (ClassMemberfunclist*)malloc(sizeof(ClassMemberfunclist));
-    newEntry->Name=name;
+    newEntry->Name=malloc(strlen(name)+1);
+    strcpy(newEntry->Name, name);
     newEntry->paramlist= Paramlist;
     newEntry->Next = NULL;
     newEntry->Flabel = getNewFuncLabel();
+    cptr->Methodcount++;
+    newEntry->Type = type;
+
     if(cptr->Vfuncptr == NULL)
     {
         newEntry->Funcposition = 0;

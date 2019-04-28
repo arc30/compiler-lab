@@ -6,6 +6,7 @@
 #include "typetable.h"
 
 
+
 void checkNameEquivalence(char* funcname, Typetable* returntype, struct paramStruct* fdefparamlist);
 
 

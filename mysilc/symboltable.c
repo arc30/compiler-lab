@@ -252,7 +252,6 @@ void LinstallParameters(paramStruct* paramlist)
 void freeLsymbolTable()
 {
     //free the entire space?
-    printf("freelsymbol####\n\n");
     LsymbolHead = NULL;
     LsymbolTail = NULL;
     nextLocalBinding = 0;

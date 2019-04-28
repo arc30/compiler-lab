@@ -2,22 +2,43 @@
 
 #include "symboltable.h"
 #include "typetable.h"
-
-
+#include "classtable.h"
+extern Classtable* Cptr;
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 void checkNameEquivalence(char* funcname, Typetable* returntype, struct paramStruct* fdefparamlist)
-{
-    Gsymbol* temp = Glookup(funcname);
-    if(temp == NULL)
+{   
+    Typetable* typetemp = NULL;
+    paramStruct* paramtemp = NULL;
+
+    if(Cptr)
     {
-        printf("ERR: Func %s not declared\n", funcname);
-        exit(0);
+        ClassMemberfunclist* temp = Class_Mlookup(Cptr, funcname);
+        if(temp == NULL)
+        {
+            printf("ERR: Func in class %s not declared\n", funcname);
+            exit(0);
+        }
+        typetemp = temp->Type;
+        paramtemp = temp->paramlist;
+
+    }
+    else
+    {
+        Gsymbol* temp = Glookup(funcname);
+        if(temp == NULL)
+        {
+            printf("ERR: Func %s not declared\n", funcname);
+            exit(0);
+        }
+        typetemp = temp->type;
+        paramtemp = temp->paramlist;
+
     }
 
-    if(!checkType(returntype,temp->type))
+    if(!checkType(returntype,typetemp))
     {
         printf("ERR: return type mismatch for %s\n",funcname);
         exit(0);
@@ -25,7 +46,7 @@ void checkNameEquivalence(char* funcname, Typetable* returntype, struct paramStr
 
     paramStruct *p1, *p2;
     p1=fdefparamlist;
-    p2=temp->paramlist;
+    p2=paramtemp;
 
     while(p1 && p2)
     {
